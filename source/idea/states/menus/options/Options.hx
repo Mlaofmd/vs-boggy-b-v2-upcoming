@@ -700,6 +700,9 @@ class GPURenderOption extends Option {
 	}
 
 	override function press():Bool {
+		if (OptionsMenu.isInPause)
+			return false;
+		
 		ClientPrefs.data.gpuRender = !ClientPrefs.data.gpuRender;
 
 		display = updateDisplay();
