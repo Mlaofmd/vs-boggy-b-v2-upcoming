@@ -196,11 +196,13 @@ class PlayState extends MusicBeatState
 	public static var campaignRatings:Array<Float> = [];
 	public static var campaignRating:Float = 0;
 
+	public var perfects:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
 	public var shits:Int = 0;
 
+	public static var campaignPerfects:Int = 0;
 	public static var campaignSicks:Int = 0;
 	public static var campaignGoods:Int = 0;
 	public static var campaignBads:Int = 0;
@@ -332,6 +334,8 @@ class PlayState extends MusicBeatState
 	
 	// stores the last judgement object
 	public static var lastRating:FlxSprite;
+	// stores the last timing sprite objects in an array
+	public static var lastTiming:FlxSprite;
 	// stores the last combo sprite object
 	public static var lastCombo:FlxSprite;
 	// stores the last combo score objects in an array
@@ -365,6 +369,14 @@ class PlayState extends MusicBeatState
 		];
 
 		//Ratings
+
+		/* if (!ClientPrefs.data.noPerfect) */ {
+			var rating:Rating = new Rating("perfect");
+			rating.score = 250;
+			rating.hitWindow = Std.int(Conductor.safeZoneOffset * 0.1);
+			ratingsData.push(rating);
+		}
+
 		ratingsData.push(new Rating('sick')); //default rating
 
 		var rating:Rating = new Rating("good");
@@ -4203,10 +4215,13 @@ class PlayState extends MusicBeatState
 		//
 
 		var rating:FlxSprite = new FlxSprite();
+		var timing:FlxSprite = new FlxSprite();
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = note.missed ? ratingsData[ratingsData.length - 1] : Conductor.judgeNote(note, noteDiff / playbackRate);
+		if (daRating.timing == "")
+			daRating = ratingsData[0];
 
 		if (!note.missed) {
 			totalNotesHit += daRating.ratingMod;
@@ -4243,6 +4258,16 @@ class PlayState extends MusicBeatState
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
 
+		timing.loadGraphic(Paths.image(pixelShitPart1 + daRating.timing + pixelShitPart2));
+		timing.visible = (daRating.timing.length > 0);
+		timing.screenCenter();
+		timing.x += ClientPrefs.data.comboOffset[0] - 20;
+		timing.y -= ClientPrefs.data.comboOffset[1] - 30;
+		timing.acceleration.y = 550;
+		timing.velocity.y -= FlxG.random.int(140, 175);
+		timing.velocity.x -= FlxG.random.int(0, 10);
+		timing.cameras = [camHUD];
+
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + "combo" + pixelShitPart2));
 		comboSpr.cameras = [camHUD];
 		comboSpr.screenCenter();
@@ -4256,23 +4281,31 @@ class PlayState extends MusicBeatState
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 
 		insert(members.indexOf(strumLineNotes), rating);
+		if (!cpuControlled)
+			insert(members.indexOf(rating) - 1, timing);
 		
 		if (!ClientPrefs.data.comboStacking)
 		{
 			if (lastRating != null) lastRating.kill();
 			lastRating = rating;
+
+			if (lastTiming != null) lastTiming.kill();
+			lastTiming = timing;
 		}
 
 		if (!PlayState.isPixelStage)
 		{
 			rating.setGraphicSize(Std.int(rating.width * 0.7));
 			rating.antialiasing = ClientPrefs.data.globalAntialiasing;
+			timing.setGraphicSize(Std.int(timing.width * 0.7));
+			timing.antialiasing = ClientPrefs.data.globalAntialiasing;
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 			comboSpr.antialiasing = ClientPrefs.data.globalAntialiasing;
 		}
 		else
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
+			timing.setGraphicSize(Std.int(timing.width * daPixelZoom * 0.85));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
 		}
 
@@ -4364,6 +4397,8 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
 			startDelay: Conductor.crochet * 0.001 / playbackRate
 		});
+
+		FlxTween.tween(timing, {alpha: 0}, 0.2 / playbackRate, {startDelay: Conductor.crochet * 0.001 / playbackRate});
 
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
 			onComplete: function(tween:FlxTween)

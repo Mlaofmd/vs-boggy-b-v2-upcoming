@@ -35,11 +35,21 @@ class Conductor
 
 	public static function judgeNote(note:Note, diff:Float=0):Rating {
 		var data:Array<Rating> = PlayState.instance.ratingsData;
+		var daRating:Rating = null;
 		for (i in 0...data.length - 2) { //skips 2 last windows (Shit and Miss)
 			if (diff <= data[i].hitWindow)
-				return data[i];
+				daRating = data[i].copy();
 		}
-		return data[data.length - 2];
+		if (daRating == null)
+			daRating = data[data.length - 2];
+
+		var noteDiff:Float = Math.abs(note.strumTime - songPosition + ClientPrefs.data.ratingOffset);
+		if (noteDiff > safeZoneOffset * 0.1)
+			daRating.timing = "early";
+		else if (noteDiff < safeZoneOffset * -0.1)
+			daRating.timing = "late";
+
+		return daRating;
 	}
 
 	public static function getCrotchetAtTime(time:Float){
@@ -161,6 +171,7 @@ class Rating
 	public var score:Int = 350;
 	public var noteSplash:Bool = true;
 	public var miss:Bool = false;
+	public var timing:String = "";
 
 	public function new(name:String) {
 		this.name = name;
@@ -175,5 +186,19 @@ class Rating
 
 	public function increase(blah:Int = 1) {
 		Reflect.setField(PlayState.instance, counter, Reflect.field(PlayState.instance, counter) + blah);
+	}
+
+	public function copy() {
+		var newRating:Rating = new Rating(name);
+		newRating.image = image;
+		newRating.counter = counter;
+		newRating.hitWindow = hitWindow;
+		newRating.ratingMod = ratingMod;
+		newRating.score = score;
+		newRating.noteSplash = noteSplash;
+		newRating.miss = miss;
+		newRating.timing = timing;
+
+		return newRating;
 	}
 }
