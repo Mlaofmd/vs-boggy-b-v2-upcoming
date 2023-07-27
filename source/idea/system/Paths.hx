@@ -397,7 +397,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		trace('oh no ' + key + ' returning null NOOOO');
+		trace('oh no ' + path + ' returning null NOOOO');
 		return null;
 	}
 
