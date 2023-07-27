@@ -125,8 +125,7 @@ class HealthIcon extends FlxSprite
 	override function updateHitbox()
 	{
 		super.updateHitbox();
-		offset.x = iconOffsets[0];
-		offset.y = iconOffsets[1];
+		offset.set(iconOffsets[0], iconOffsets[1]);
 	}
 
 	public function getCharacter():String {
@@ -134,7 +133,8 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0) {
-		animOffsets.set(name, [x, y]);
+		//animOffsets.set(name, [x, y]);
+		animOffsets[name] = [x, y]; // ??????????????????????
 	}
 
 	public function playAnim(name:String, force:Bool = false, reversed:Bool = false, frame:Int = 0) {
