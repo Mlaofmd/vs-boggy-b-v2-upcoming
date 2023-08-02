@@ -17,6 +17,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import external.stylesheet.*;
 
 using StringTools;
 
@@ -139,6 +140,21 @@ class Character extends FlxSprite
 				{
 					spriteType = "packer";
 				}
+
+				#if MODS_ALLOWED
+				var modTxtToFind:String = Paths.modFolders('images/' + json.image + '.css');
+				var txtToFind:String = Paths.getPath('images/' + json.image + '.css', TEXT);
+				
+				//var modTextureToFind:String = Paths.modFolders("images/"+json.image);
+				//var textureToFind:String = Paths.getPath('images/' + json.image, new AssetType();
+				
+				if (FileSystem.exists(modTxtToFind) || FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
+				#else
+				if (Assets.exists(Paths.getPath('images/' + json.image + '.css', TEXT)))
+				#end
+				{
+					spriteType = "stylesheet";
+				}
 				
 				#if MODS_ALLOWED
 				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
@@ -165,6 +181,20 @@ class Character extends FlxSprite
 					
 					case "texture":
 						frames = AtlasFrameMaker.construct(json.image);
+
+					case "stylesheet":
+						var choice:String = Paths.getPath('images/${json.image}.css', TEXT);
+						var choice2:String = Paths.modFolders('images/${json.image}.css');
+						#if MODS_ALLOWED
+							if(FileSystem.exists(choice) || Assets.exists(choice)){
+								choice = Paths.getPath('images/${json.image}.css', TEXT);							
+							}else if(FileSystem.exists(choice2)){
+								choice = Paths.modFolders('images/${json.image}.css');	
+							}
+						#else
+							choice = Paths.getPath('images/${json.image}.css');		
+						#end
+						frames = KrpCssAtlas.fromCss(Paths.image(json.image), File.getContent(choice));
 				}
 				imageFile = json.image;
 
