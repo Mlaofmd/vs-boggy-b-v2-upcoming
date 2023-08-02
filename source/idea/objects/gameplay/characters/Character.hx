@@ -183,18 +183,7 @@ class Character extends FlxSprite
 						frames = AtlasFrameMaker.construct(json.image);
 
 					case "stylesheet":
-						var choice:String = Paths.getPath('images/${json.image}.css', TEXT);
-						var choice2:String = Paths.modFolders('images/${json.image}.css');
-						#if MODS_ALLOWED
-							if(FileSystem.exists(choice) || Assets.exists(choice)){
-								choice = Paths.getPath('images/${json.image}.css', TEXT);							
-							}else if(FileSystem.exists(choice2)){
-								choice = Paths.modFolders('images/${json.image}.css');	
-							}
-						#else
-							choice = Paths.getPath('images/${json.image}.css');		
-						#end
-						frames = KrpCssAtlas.fromCss(Paths.image(json.image), File.getContent(choice));
+						frames = CssAtlasFrames.build(json.image);
 				}
 				imageFile = json.image;
 
