@@ -376,7 +376,7 @@ class PlayState extends MusicBeatState
 
 		/* if (!ClientPrefs.data.noPerfect) */ {
 			var rating:Rating = new Rating("perfect");
-			rating.score = 250;
+			rating.score = 400;
 			rating.hitWindow = Std.int(Conductor.safeZoneOffset * 0.1);
 			ratingsData.push(rating);
 		}
@@ -4222,15 +4222,22 @@ class PlayState extends MusicBeatState
 		var timing:FlxSprite = new FlxSprite();
 		var score:Int = 350;
 
+		var daTiming:String = "";
+
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = note.missed ? ratingsData[ratingsData.length - 1] : Conductor.judgeNote(note, noteDiff / playbackRate);
-		if (daRating.timing == "")
+		if (daTiming == "")
 			daRating = ratingsData[0];
+
+        if (noteDiff / playbackRate > Conductor.safeZoneOffset * 0.1)
+			daTiming = "early";
+		else if (noteDiff / playbackRate < Conductor.safeZoneOffset * -0.1)
+			daTiming = "late";
 
 		if (!note.missed) {
 			totalNotesHit += daRating.ratingMod;
 			note.ratingMod = daRating.ratingMod;
-			if(!note.ratingDisabled) daRating.increase();
+			if (!note.ratingDisabled) daRating.increase();
 			note.rating = daRating.name;
 			score = daRating.score;
 
@@ -4262,15 +4269,17 @@ class PlayState extends MusicBeatState
 		rating.x += ClientPrefs.data.comboOffset[0];
 		rating.y -= ClientPrefs.data.comboOffset[1];
 
-		timing.loadGraphic(Paths.image(pixelShitPart1 + daRating.timing + pixelShitPart2));
-		timing.visible = (daRating.timing.length > 0);
+        if (daTiming.length > 0)
+            timing.loadGraphic(Paths.image(pixelShitPart1 + daTiming + pixelShitPart2));
+        else
+            timing.visible = false;
+        timing.cameras = [camHUD];
 		timing.screenCenter();
 		timing.x += ClientPrefs.data.comboOffset[0] - 20;
 		timing.y -= ClientPrefs.data.comboOffset[1] - 30;
-		timing.acceleration.y = 550;
-		timing.velocity.y -= FlxG.random.int(140, 175);
-		timing.velocity.x -= FlxG.random.int(0, 10);
-		timing.cameras = [camHUD];
+		timing.acceleration.y = 550 * playbackRate * playbackRate;
+		timing.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+		timing.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + "combo" + pixelShitPart2));
 		comboSpr.cameras = [camHUD];
@@ -5427,6 +5436,10 @@ class PlayState extends MusicBeatState
 			var achievementName:String = achievesToCheck[i];
 			if (!AchievementData.isAchievementUnlocked(achievementName) && !cpuControlled) {
 				var unlock:Bool = false;
+
+				var returnedValue:Dynamic = callOnLuas("checkForAchievement", [achievementName]);
+				if (returnedValue != null && returnedValue != 0 && returnedValue != FunkinLua.Function_Continue && returnedValue is Bool)
+					unlock = returnedValue;
 				
 				if (achievementName.contains(WeekData.getWeekFileName()) && achievementName.endsWith("_nomiss")) {
 					if (isStoryMode && campaignMisses + songMisses == 0 && CoolUtil.difficultyString() == "HARD" && storyPlaylist.length == 0 && !changedDifficulty && !usedPractice)
@@ -5473,49 +5486,6 @@ class PlayState extends MusicBeatState
 							if (Paths.formatToSongPath(SONG.song) == "test" && !usedPractice)
 								unlock = true;
 					}
-				}
-
-				switch(achievementName)
-				{
-					case 'ur_bad':
-						if(ratingPercent < 0.2 && !practiceMode) {
-							unlock = true;
-						}
-					case 'ur_good':
-						if(ratingPercent >= 1 && !usedPractice) {
-							unlock = true;
-						}
-					case 'roadkill_enthusiast':
-						if(AchievementData.henchmenDeath >= 100) {
-							unlock = true;
-						}
-					case 'oversinging':
-						if(boyfriend.holdTimer >= 10 && !usedPractice) {
-							unlock = true;
-						}
-					case 'hype':
-						if(!boyfriendIdled && !usedPractice) {
-							unlock = true;
-						}
-					case 'two_keys':
-						if(!usedPractice) {
-							var howManyPresses:Int = 0;
-							for (j in 0...keysPressed.length) {
-								if(keysPressed[j]) howManyPresses++;
-							}
-
-							if(howManyPresses <= 2) {
-								unlock = true;
-							}
-						}
-					case 'toastie':
-						if(/*ClientPrefs.data.framerate <= 60 &&*/ !ClientPrefs.data.shaders && ClientPrefs.data.lowQuality && !ClientPrefs.data.globalAntialiasing) {
-							unlock = true;
-						}
-					case 'debugger':
-						if(Paths.formatToSongPath(SONG.song) == 'test' && !usedPractice) {
-							unlock = true;
-						}
 				}
 
 				if (unlock) {

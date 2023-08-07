@@ -38,16 +38,10 @@ class Conductor
 		var daRating:Rating = null;
 		for (i in 0...data.length - 2) { //skips 2 last windows (Shit and Miss)
 			if (diff <= data[i].hitWindow)
-				daRating = data[i].copy();
+				daRating = data[i];
 		}
 		if (daRating == null)
 			daRating = data[data.length - 2];
-
-		var noteDiff:Float = Math.abs(note.strumTime - songPosition + ClientPrefs.data.ratingOffset);
-		if (noteDiff > safeZoneOffset * 0.1)
-			daRating.timing = "early";
-		else if (noteDiff < safeZoneOffset * -0.1)
-			daRating.timing = "late";
 
 		return daRating;
 	}
@@ -171,13 +165,14 @@ class Rating
 	public var score:Int = 350;
 	public var noteSplash:Bool = true;
 	public var miss:Bool = false;
-	public var timing:String = "";
 
 	public function new(name:String) {
 		this.name = name;
 		this.image = name;
 		this.counter = name + 's';
-		this.hitWindow = Reflect.field(ClientPrefs.data, name + 'Window');
+        
+        this.hitWindow = Reflect.field(ClientPrefs.data, name + "Window");
+
 		if(hitWindow == null)
 		{
 			hitWindow = 0;
@@ -186,19 +181,5 @@ class Rating
 
 	public function increase(blah:Int = 1) {
 		Reflect.setField(PlayState.instance, counter, Reflect.field(PlayState.instance, counter) + blah);
-	}
-
-	public function copy() {
-		var newRating:Rating = new Rating(name);
-		newRating.image = image;
-		newRating.counter = counter;
-		newRating.hitWindow = hitWindow;
-		newRating.ratingMod = ratingMod;
-		newRating.score = score;
-		newRating.noteSplash = noteSplash;
-		newRating.miss = miss;
-		newRating.timing = timing;
-
-		return newRating;
 	}
 }
