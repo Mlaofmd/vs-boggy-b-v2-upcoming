@@ -33,11 +33,11 @@ class Conductor
 	{
 	}
 
-	public static function judgeNote(note:Note, diff:Float=0):Rating {
+	public static function judgeNote(note:Note, diff:Float = 0):Rating {
 		var data:Array<Rating> = PlayState.instance.ratingsData;
 		var daRating:Rating = null;
 		for (i in 0...data.length - 2) { //skips 2 last windows (Shit and Miss)
-			if (diff <= data[i].hitWindow)
+			if (daRating == null && diff <= data[i].hitWindow)
 				daRating = data[i];
 		}
 		if (daRating == null)

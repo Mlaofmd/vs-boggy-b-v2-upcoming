@@ -230,8 +230,8 @@ class PlayState extends MusicBeatState
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
-	public var camHUD:FlxCamera = new FlxCamera();
 	public var camGame:SwagCamera = new SwagCamera();
+    public var camHUD:FlxCamera = new FlxCamera();
 	public var camOther:FlxCamera = new FlxCamera();
 	public var cameraSpeed:Float = 1;
 
@@ -376,8 +376,7 @@ class PlayState extends MusicBeatState
 
 		/* if (!ClientPrefs.data.noPerfect) */ {
 			var rating:Rating = new Rating("perfect");
-			rating.score = 400;
-			rating.hitWindow = Std.int(Conductor.safeZoneOffset * 0.1);
+			rating.hitWindow = 15;
 			ratingsData.push(rating);
 		}
 
@@ -1232,7 +1231,7 @@ class PlayState extends MusicBeatState
 					whiteScreen.scrollFactor.set();
 					whiteScreen.blend = ADD;
 					camHUD.visible = false;
-					snapCamFollowToPos(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
+					camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
 					inCutscene = true;
 
 					FlxTween.tween(whiteScreen, {alpha: 0}, 1, {
@@ -1263,7 +1262,7 @@ class PlayState extends MusicBeatState
 						}
 					});
 					FlxG.sound.play(Paths.sound('Lights_Turn_On'));
-					snapCamFollowToPos(400, -2050);
+					camFollow.setPosition(400, -2050);
 					FlxG.camera.snapToTarget();
 					FlxG.camera.zoom = 1.5;
 
@@ -3976,10 +3975,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function snapCamFollowToPos(x:Float, y:Float) {
-		camFollow.setPosition(x, y);
-	}
-
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
 		var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
@@ -4031,16 +4026,7 @@ class PlayState extends MusicBeatState
 		if (Main.achieveVar.numChildren > 0)
 			return;
 		else {
-			var achievesToCheck:Array<String> = [];
-			for (achieve in AchievementData.achievementsList) {
-				if (achieve.endsWith("_nomiss"))
-					achievesToCheck.push(achieve);
-			}
-			for (achieve in ["ur_bad", "ur_good", "hype", "two_keys", "toastie", "debugger"]) {
-				if (AchievementData.achievementsList.contains(achieve))
-					achievesToCheck.push(achieve);
-			}
-			var achieve:String = checkForAchievement(achievesToCheck);
+			var achieve:String = checkForAchievement(AchievementData.achievementsList);
 
 			if (achieve != null) {
 				startAchievement(achieve);
@@ -4192,20 +4178,24 @@ class PlayState extends MusicBeatState
 			pixelShitPart2 = '-pixel';
 		}
 
-		Paths.image(pixelShitPart1 + "sick" + pixelShitPart2);
-		Paths.image(pixelShitPart1 + "good" + pixelShitPart2);
-		Paths.image(pixelShitPart1 + "bad" + pixelShitPart2);
-		Paths.image(pixelShitPart1 + "shit" + pixelShitPart2);
-		Paths.image(pixelShitPart1 + "combo" + pixelShitPart2);
+        for (img in [
+            "perfect",
+            "sick",
+            "good",
+            "bad",
+            "shit",
+            "combo",
+            "early",
+            "late"
+        ]) Paths.image(pixelShitPart1 + img + pixelShitPart2);
 		
-		for (i in 0...10) {
+		for (i in 0...10)
 			Paths.image(pixelShitPart1 + 'num' + i + pixelShitPart2);
-		}
 	}
 
 	private function popUpScore(note:Note = null):Void
 	{
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset);
+		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset) / playbackRate;
 		//trace(noteDiff, ' ' + Math.abs(note.strumTime - Conductor.songPosition));
 
 		// boyfriend.playAnim('hey');
@@ -4225,13 +4215,11 @@ class PlayState extends MusicBeatState
 		var daTiming:String = "";
 
 		//tryna do MS based judgment due to popular demand
-		var daRating:Rating = note.missed ? ratingsData[ratingsData.length - 1] : Conductor.judgeNote(note, noteDiff / playbackRate);
-		if (daTiming == "")
-			daRating = ratingsData[0];
-
-        if (noteDiff / playbackRate > Conductor.safeZoneOffset * 0.1)
+		var daRating:Rating = note.missed ? ratingsData[ratingsData.length - 1] : Conductor.judgeNote(note, noteDiff);
+		
+        if (noteDiff > 15)
 			daTiming = "early";
-		else if (noteDiff / playbackRate < Conductor.safeZoneOffset * -0.1)
+		else if (noteDiff < -15)
 			daTiming = "late";
 
 		if (!note.missed) {
