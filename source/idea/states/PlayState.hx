@@ -380,7 +380,7 @@ class PlayState extends MusicBeatState
 			ratingsData.push(rating);
 		}
 
-		ratingsData.push(new Rating('sick')); //default rating
+		ratingsData.push(new Rating("sick")); //default rating
 
 		var rating:Rating = new Rating("good");
 		rating.ratingMod = 0.7;
@@ -398,10 +398,6 @@ class PlayState extends MusicBeatState
 		rating.ratingMod = 0;
 		rating.score = 50;
 		rating.noteSplash = false;
-		ratingsData.push(rating);
-
-		var rating:Rating = new Rating("miss");
-		rating.miss = true;
 		ratingsData.push(rating);
 
 		// For the "Just the Two of Us" achievement
@@ -4217,9 +4213,10 @@ class PlayState extends MusicBeatState
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = note.missed ? ratingsData[ratingsData.length - 1] : Conductor.judgeNote(note, noteDiff);
 		
-        if (noteDiff > 15)
+		var msDiff:Float = (note.strumTime - Conductor.songPosition + ClientPrefs.data.ratingOffset) / playbackRate;
+        if (msDiff > 15)
 			daTiming = "early";
-		else if (noteDiff < -15)
+		else if (msDiff < -15)
 			daTiming = "late";
 
 		if (!note.missed) {
@@ -4239,7 +4236,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (daRating.noteSplash && !note.noteSplashDisabled && !daRating.miss)
+		if (daRating.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note);
 
 		var pixelShitPart1:String = PlayState.isPixelStage ? "pixelUI/" : "";
@@ -4281,12 +4278,11 @@ class PlayState extends MusicBeatState
 		comboSpr.y += 60;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
 
-		insert(members.indexOf(strumLineNotes), rating);
+		insert(members.indexOf(sustainNotes), rating);
 		if (!cpuControlled)
 			insert(members.indexOf(rating) - 1, timing);
 		
-		if (!ClientPrefs.data.comboStacking)
-		{
+		if (!ClientPrefs.data.comboStacking) {
 			if (lastRating != null) lastRating.kill();
 			lastRating = rating;
 
@@ -4312,6 +4308,7 @@ class PlayState extends MusicBeatState
 
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
+		timing.updateHitbox();
 
 		var seperatedScore:Array<Int> = [];
 
@@ -4326,7 +4323,7 @@ class PlayState extends MusicBeatState
 		var xThing:Float = 0;
 		if (showCombo)
 		{
-			insert(members.indexOf(strumLineNotes), comboSpr);
+			insert(members.indexOf(sustainNotes), comboSpr);
 		}
 		if (!ClientPrefs.data.comboStacking)
 		{
@@ -4406,7 +4403,7 @@ class PlayState extends MusicBeatState
 			{
 				coolText.destroy();
 				comboSpr.destroy();
-
+				timing.destroy();
 				rating.destroy();
 			},
 			startDelay: Conductor.crochet * 0.002 / playbackRate
@@ -4656,8 +4653,6 @@ class PlayState extends MusicBeatState
 		}
 
 		daNote.missed = true;
-		if (!daNote.isSustainNote)
-			popUpScore(daNote);
 
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote]);
 	}

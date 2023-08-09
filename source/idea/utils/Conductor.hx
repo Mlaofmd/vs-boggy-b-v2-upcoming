@@ -36,12 +36,14 @@ class Conductor
 	public static function judgeNote(note:Note, diff:Float = 0):Rating {
 		var data:Array<Rating> = PlayState.instance.ratingsData;
 		var daRating:Rating = null;
-		for (i in 0...data.length - 2) { //skips 2 last windows (Shit and Miss)
-			if (daRating == null && diff <= data[i].hitWindow)
+		for (i in 0...data.length - 1) { //skips last window (Shit)
+			if (diff <= data[i].hitWindow) {
 				daRating = data[i];
+				return daRating;
+			}
 		}
 		if (daRating == null)
-			daRating = data[data.length - 2];
+			daRating = data[data.length - 1];
 
 		return daRating;
 	}
@@ -164,7 +166,6 @@ class Rating
 	public var ratingMod:Float = 1;
 	public var score:Int = 350;
 	public var noteSplash:Bool = true;
-	public var miss:Bool = false;
 
 	public function new(name:String) {
 		this.name = name;
