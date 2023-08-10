@@ -722,7 +722,7 @@ class ModMetadata
 	public var restart:Bool;//trust me. this is very important
 	public var alphabet:Alphabet;
 	public var icon:AttachedSprite;
-	public var discord_rpc:String;
+	public var discordRPC:String;
 
 	public function new(folder:String)
 	{
@@ -739,10 +739,10 @@ class ModMetadata
 			if(rawJson != null && rawJson.length > 0) {
 				var stuff:Dynamic = Json.parse(rawJson);
 
-				if (stuff.name != null && stuff.name.length > 0)
+				if (stuff.name != null && stuff.name != "Name" && stuff.name.length > 0)
 					name = stuff.name;
 				
-				if (stuff.description != null && stuff.description.length > 0)
+				if (stuff.description != null && stuff.description != "Description" && stuff.description.length > 0)
 					description = stuff.description;
 
 				if (stuff.colors != null && stuff.colors.length == 3)
@@ -754,7 +754,7 @@ class ModMetadata
 					restart = stuff.restart;
 
 				if (stuff.discord_rpc != null && stuff.discord_rpc.length > 0)
-					discord_rpc = stuff.discord_rpc;
+					discordRPC = stuff.discord_rpc;
 			}
 		}
 	}

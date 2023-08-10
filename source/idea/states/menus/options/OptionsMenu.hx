@@ -129,6 +129,7 @@ class OptionsMenu extends MusicBeatSubstate {
 				new ComboStackingOption("If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read.")
 			]),
 			new OptionCata(640, 40, "Misc", [
+                new ColorblindOption("You can set colorblind filter. (makes the game more playable for colorblind people)"),
 				new GPURenderOption("Toggle textures loading with graphic card."),
 				#if !web new FPSCapOption("Change your FPS Cap."), #end
 				new FPSOption("Toggle FPS Counter."),

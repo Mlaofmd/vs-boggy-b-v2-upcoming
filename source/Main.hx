@@ -1,27 +1,21 @@
-package;
-
-import flixel.FlxG;
-import flixel.FlxGame;
-import flixel.FlxState;
-import openfl.Lib;
-import openfl.display.Sprite;
-import openfl.events.Event;
-import openfl.display.StageScaleMode;
-import lime.app.Application;
+#if CRASH_HANDLER
+import haxe.io.Path;
+import sys.io.File;
+import sys.FileSystem;
+import haxe.CallStack;
+import openfl.events.UncaughtErrorEvent;
+#end
 
 #if desktop
 import external.Discord.DiscordClient;
 #end
 
-//crash handler stuff
-#if CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
-import haxe.CallStack;
-import haxe.io.Path;
-import sys.FileSystem;
-import sys.io.File;
-import sys.io.Process;
-#end
+import flixel.FlxG;
+import flixel.FlxGame;
+import openfl.events.Event;
+import openfl.Lib;
+import openfl.display.Sprite;
+import flixel.FlxState;
 
 using StringTools;
 
@@ -85,11 +79,13 @@ class Main extends Sprite {
 
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 		
-		#if !mobile
+        ClientPrefs.loadPrefs();
+        
+        #if !mobile
 		fpsVar = new FieldFPS(10, 3);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+		Lib.current.stage.scaleMode = NO_SCALE;
 		if(fpsVar != null) {
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
@@ -104,18 +100,18 @@ class Main extends Sprite {
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		#end
-		
-		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		#end
 
-		#if desktop
+        #if desktop
 		if (!DiscordClient.isInitialized) {
 			DiscordClient.initialize();
-			Application.current.window.onClose.add(function() {
+            FlxG.stage.application.window.onClose.add(function() {
 				DiscordClient.shutdown();
 			});
 		}
+		#end
+		
+		#if CRASH_HANDLER
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
 
 		FlxG.signals.gameResized.add(function(width:Int, height:Int) {
@@ -168,7 +164,7 @@ class Main extends Sprite {
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
-		Application.current.window.alert(errMsg, "Error!");
+        FlxG.stage.application.window.alert(errMsg, "Error!");
 		DiscordClient.shutdown();
 		Sys.exit(1);
 	}

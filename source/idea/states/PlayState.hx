@@ -231,8 +231,8 @@ class PlayState extends MusicBeatState
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	public var camGame:SwagCamera = new SwagCamera();
-    public var camHUD:FlxCamera = new FlxCamera();
-	public var camOther:FlxCamera = new FlxCamera();
+    public var camHUD:SwagCamera = new SwagCamera();
+	public var camOther:SwagCamera = new SwagCamera();
 	public var cameraSpeed:Float = 1;
 
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];

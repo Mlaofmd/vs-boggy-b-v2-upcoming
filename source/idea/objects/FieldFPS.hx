@@ -1,6 +1,5 @@
 package idea.objects;
 
-import openfl.system.System;
 import flixel.math.FlxMath;
 import openfl.Lib;
 import openfl.events.Event;
@@ -48,7 +47,7 @@ class FieldFPS extends Sprite {
 		source.multiline = true;
         source.visible = visible;
 
-        output = ImageOutline.renderImage(source, 1, FlxColor.BLACK, true);
+        output = ImageOutline.renderImage(source, 1, 0xff000000, true);
         output.visible = visible;
         addChild(output);
 
@@ -75,7 +74,7 @@ class FieldFPS extends Sprite {
 		{
             source.text = "FPS: " + currentFPS;
 
-            var memoryUsed:Float = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
+            var memoryUsed:Float = Math.abs(FlxMath.roundDecimal(Native.getTotalRAM() / 1000000, 1));
             var memoryPostfix:String = (memoryUsed > 1000 ? "GB" : "MB");
             if (memoryUsed < 1000)
                 memoryUsed = Math.round(memoryUsed);
@@ -88,7 +87,7 @@ class FieldFPS extends Sprite {
         source.visible = visible;
         removeChild(output);
 
-        output = ImageOutline.renderImage(source, 1, FlxColor.BLACK, true);
+        output = ImageOutline.renderImage(source, 1, 0xff000000, true);
         output.visible = visible;
 
         addChild(output);

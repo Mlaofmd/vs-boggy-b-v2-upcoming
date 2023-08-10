@@ -36,6 +36,7 @@ class SaveVariables {
 	public var pauseMusic:String = "Tea Time";
 	public var checkForUpdates:Bool = true;
 	public var comboStacking:Bool = true;
+    public var colorblind:String = "None";
 	public var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -164,6 +165,8 @@ class ClientPrefs {
 			FlxG.drawFramerate = data.framerate;
 			FlxG.updateFramerate = data.framerate;
 		}
+
+        ColorblindFilter.applyFiltersOnGame();
 
 		// flixel automatically saves your volume!
 		if (FlxG.save.data.volume != null)

@@ -26,11 +26,7 @@ class ColorSwapPixel {
         return value;
     }
 
-    public function new() {
-        var uBlockSize:Float = 1;
-        if (PlayState.isPixelStage)
-            uBlockSize = PlayState.daPixelZoom;
-
+    public function new(uBlockSize:Float) {
         shader.data.uBlockSize.value = [uBlockSize, uBlockSize];
 	}
 }

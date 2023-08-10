@@ -20,6 +20,7 @@ class ResultsScreen extends MusicBeatSubstate {
         add(clearedText);
 
         var comboText:FlxText = new FlxText(20, -75, "Judgements:");
+        comboText.text += "\nPerfects: " + (PlayState.isStoryMode ? PlayState.campaignPerfects : PlayState.instance.perfects);
         comboText.text += "\nSicks: " + (PlayState.isStoryMode ? PlayState.campaignSicks : PlayState.instance.sicks);
         comboText.text += "\nGoods: " + (PlayState.isStoryMode ? PlayState.campaignGoods : PlayState.instance.goods);
         comboText.text += "\nBads: " + (PlayState.isStoryMode ? PlayState.campaignBads : PlayState.instance.bads);

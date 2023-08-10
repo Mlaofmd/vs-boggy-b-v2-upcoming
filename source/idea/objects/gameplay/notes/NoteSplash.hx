@@ -21,15 +21,15 @@ class NoteSplash extends FlxSprite
 		this.isSustain = isSustain;
 		noteData = note;
 
-		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
+		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin != regularSkin && PlayState.SONG.splashSkin.length > 0)
 			regularSkin = PlayState.SONG.splashSkin;
 
-		/*if (PlayState.SONG.extraSkin != null && PlayState.SONG.extraSkin.length > 0)
+		/*if (PlayState.SONG.extraSkin != null && PlayState.SONG.extraSkin != sustainSkin && PlayState.SONG.extraSkin.length > 0)
 			sustainSkin = PlayState.SONG.extraSkin;*/
 
 		loadAnims(isSustain ? sustainSkin : regularSkin);
 		
-		colorSwap = new ColorSwapPixel();
+		colorSwap = new ColorSwapPixel(PlayState.isPixelStage ? PlayState.daPixelZoom : 1);
 		shader = colorSwap.shader;
 
 		setupNoteSplash(x, y, note);

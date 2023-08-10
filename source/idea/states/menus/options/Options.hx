@@ -186,6 +186,7 @@ class Option {
 
 package idea.states.menus.options;
 
+import idea.effects.ColorblindFilter;
 import flixel.FlxG;
 
 class Option {
@@ -690,6 +691,47 @@ class ComboStackingOption extends Option {
 
 	override function updateDisplay():String {
 		return "Combo Stacking: " + (ClientPrefs.data.comboStacking ? "Enabled" : "Disabled");
+	}
+}
+
+class ColorblindOption extends Option {
+	var values:Array<String> = ["None", "Deuteranopia", "Protanopia", "Tritanopia"];
+	var value:Int;
+	public function new(desc:String) {
+		super();
+		description = desc;
+	}
+
+	override function left():Bool {
+		value --;
+		if (value < 0)
+			value = values.length - 1;
+		if (value > values.length - 1)
+			value = 0;
+		ClientPrefs.data.colorblind = values[value];
+
+        ColorblindFilter.applyFiltersOnGame();
+
+		display = updateDisplay();
+		return true;
+	}
+
+	override function right():Bool {
+		value ++;
+		if (value < 0)
+			value = values.length - 1;
+		if (value > values.length - 1)
+			value = 0;
+		ClientPrefs.data.colorblind = values[value];
+
+        ColorblindFilter.applyFiltersOnGame();
+
+		display = updateDisplay();
+		return true;
+	}
+
+	override function updateDisplay():String {
+		return "Colorblind Mode: < " + ClientPrefs.data.colorblind + " >";
 	}
 }
 

@@ -1,3 +1,5 @@
+// credits, original source https://lassieadventurestudio.wordpress.com/2008/10/07/image-outline/
+
 package idea.utils;
 
 import openfl.display.IBitmapDrawable;
@@ -17,25 +19,30 @@ class ImageOutline
 	private static var _brush:Float = 4;
 	private static var m:Matrix;
 
-	public function new() {}
+	public function new()
+	{
+	}
 
 	/**
 	 * Renders a Bitmap display of any DisplayObject with an outline drawn around it.
 	 * @note: see param descriptions on "outline" method below.
 	 */
-	public static function renderImage(src:IBitmapDrawable, weight:Int, color:UInt, alpha:Float = 1, antialias:Bool = false, threshold:Int = 150):Bitmap {
+	public static function renderImage(src:IBitmapDrawable, weight:Int, color:UInt, alpha:Float = 1, antialias:Bool = false, threshold:Int = 150):Bitmap
+	{
 		var w:Int = 0;
 		var h:Int = 0;
 
 		// extract dimensions from actual object type.
 		// (unfortunately, IBitmapDrawable does not include width and height getters.)
-		if (Std.isOfType(src, DisplayObject)) {
+		if (Std.is(src, DisplayObject))
+		{
 			var dsp:DisplayObject = cast(src, DisplayObject);
 			m = dsp.transform.matrix;
 			w = Std.int(dsp.width);
 			h = Std.int(dsp.height);
 		}
-		else if (Std.isOfType(src, BitmapData)) {
+		else if (Std.is(src, BitmapData))
+		{
 			var bmp:BitmapData = cast(src, BitmapData);
 			w = Std.int(bmp.width);
 			h = Std.int(bmp.height);
@@ -58,7 +65,8 @@ class ImageOutline
 	 * @param: threshold = Alpha sensativity to source image (0 - 255). Used when drawing a jagged edge based on an antialiased source image.
 	 * @return: BitmapData of rendered outline image.
 	 */
-	public static function outline(src:BitmapData, weight:Int, color:UInt, alpha:Float = 1, antialias:Bool = false, threshold:Int = 150):BitmapData {
+	public static function outline(src:BitmapData, weight:Int, color:UInt, alpha:Float = 1, antialias:Bool = false, threshold:Int = 150):BitmapData
+	{
 		_color = color;
 		_hex = _toHexString(color);
 		_alpha = alpha;
@@ -67,17 +75,21 @@ class ImageOutline
 
 		var copy:BitmapData = new BitmapData(Std.int(src.width + _brush), Std.int(src.height + _brush), true, 0x00000000);
 
-		for (iy in 0...src.height) {
-			for (ix in 0...src.width) {
+		for (iy in 0...src.height)
+		{
+			for (ix in 0...src.width)
+			{
 				// get current pixel's alpha component.
 				var a:Float = (src.getPixel32(ix, iy) >> 24 & 0xFF);
 
-				if (antialias) {
+				if (antialias)
+				{
 					// if antialiasing,
 					// draw anti-aliased edge.
 					_antialias(copy, ix, iy, Std.int(a));
 				}
-				else if (a > threshold) {
+				else if (a > threshold)
+				{
 					// if aliasing and pixel alpha is above draw threshold,
 					// draw aliased edge.
 					_alias(copy, ix, iy);
@@ -93,10 +105,14 @@ class ImageOutline
 	/**
 	 * Renders an antialiased pixel block.
 	 */
-	private static function _antialias(copy:BitmapData, x:Int, y:Int, a:Int):BitmapData {
-		if (a > 0) {
-			for (iy in y...Std.int(y + _brush)) {
-				for (ix in x...Std.int(x + _brush)) {
+	private static function _antialias(copy:BitmapData, x:Int, y:Int, a:Int):BitmapData
+	{
+		if (a > 0)
+		{
+			for (iy in y...Std.int(y + _brush))
+			{
+				for (ix in x...Std.int(x + _brush))
+				{
 					// get current pixel's alpha component.
 					var px:Float = (copy.getPixel32(ix, iy) >> 24 & 0xFF);
 
@@ -112,7 +128,8 @@ class ImageOutline
 	/**
 	 * Renders an aliased pixel block.
 	 */
-	private static function _alias(copy:BitmapData, x:Int, y:Int):BitmapData {
+	private static function _alias(copy:BitmapData, x:Int, y:Int):BitmapData
+	{
 		copy.fillRect(new Rectangle(x, y, _brush, _brush), _parseARGB(Std.int(_alpha * 255)));
 		return copy;
 	}
@@ -121,14 +138,16 @@ class ImageOutline
 	 * Utility to parse an ARGB value from the current hex value
 	 * Hex string is cached on the class so that it does not need to be recalculated for every pixel.
 	 */
-	private static function _parseARGB(a:Int):UInt {
+	private static function _parseARGB(a:Int):UInt
+	{
 		return Std.parseInt("0x" + StringTools.hex(a) + _hex);
 	}
 
 	/**
 	 * Utility to parse a hex string from a hex number.
 	 */
-	private static function _toHexString(hex:UInt):String {
+	private static function _toHexString(hex:UInt):String
+	{
 		var r:Int = (hex >> 16);
 		var g:Int = (hex >> 8 ^ r << 8);
 		var b:Int = (hex ^ (r << 16 | g << 8));
