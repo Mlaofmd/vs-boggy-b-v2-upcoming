@@ -46,10 +46,11 @@ class FieldFPS extends Sprite {
 		source.autoSize = LEFT;
 		source.multiline = true;
         source.visible = visible;
+        addChild(source);
 
-        output = ImageOutline.renderImage(source, 1, 0xff000000, true);
-        output.visible = visible;
-        addChild(output);
+        // output = ImageOutline.renderImage(source, 1, 0xff000000, true);
+        // output.visible = visible;
+        // addChild(output);
 
         cacheCount = 0;
 		currentTime = 0;
@@ -85,13 +86,12 @@ class FieldFPS extends Sprite {
 		}
 
         source.visible = visible;
-        removeChild(output);
+        // removeChild(output);
 
-        output = ImageOutline.renderImage(source, 1, 0xff000000, true);
-        output.visible = visible;
+        // output = ImageOutline.renderImage(source, 1, 0xff000000, true);
+        // output.visible = visible;
 
-        addChild(output);
-        source.visible = false;
+        // addChild(output);
 
         cacheCount = currentCount;
     }
