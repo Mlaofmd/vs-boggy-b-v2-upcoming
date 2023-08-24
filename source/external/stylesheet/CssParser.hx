@@ -3,36 +3,55 @@ package external.stylesheet;
 using StringTools;
 
 class CssParser {
-	public static function getSprites(css:String):Array<CssSprite> {
-		var sprites:Array<CssSprite> = [];
-		for (string in css.replace("\n", "").replace("  ", " ").split(".sprite")) {
-			var tag:String = "";
-			var width:Int = 0;
-			var height:Int = 0;
-			var pos:Array<Int> = [];
+	public var sprites:Map<String, CssSprite> = [];
 
-			var lines:Array<String> = string.split(";");
+	private var curlyOpened:Bool = false;
+	private var lastSprite:String = null;
 
-			tag = lines[0].substring(1, lines[0].indexOf("{")).trim();
-			lines[0] = lines[0].substr(tag.length + 1).trim();
+	public function new(css:String) {
+		css = css.replace("\n", " ").replace("  ", " ").replace("\t", "").replace(";", "");
 
-			for (line in lines) {
-				var field:String = line.split(":")[0].replace(" ", "").trim();
-				var value:String = line.split(":")[1].replace(" ", "").trim();
+		var words:Array<String> = css.split(" ");
+		for (i in 0...words.length) {
+			var word:String = words[i];
 
-				switch(field) {
-					case "width":
-						width = Std.parseInt(value);
-					case "height":
-						height = Std.parseInt(value);
-					case "background-position":
-						pos = [Std.parseInt(value.replace("px", "").split(" ")[0]), Std.parseInt(value.replace("px", "").split(" ")[1])];
-				}
+			if (word.startsWith(".sprite-")) {
+				lastSprite = word.replace(".sprite-", "");
+				sprites.set(lastSprite, new CssSprite());
 			}
-
-			sprites.push(new CssSprite(pos[0], pos[1], width, height, tag));
+			else if (word == "{")
+				curlyOpened = true;
+			else if (word == "}") {
+				if (!curlyOpened) {
+					trace("Error on CSS! Unexpected }");
+					return;
+				} else {
+					curlyOpened = false;
+					lastSprite = null;
+				}
+			} else if (word == "width:") {
+				if (lastSprite == null && curlyOpened) {
+					trace("Error on CSS! Unknown Identifier: width. Word: " + i);
+					return;
+				} else
+					sprites[lastSprite].width = Std.parseInt(words[i + 1].replace("px", ""));
+			} else if (word == "height:") {
+				if (lastSprite == null && curlyOpened) {
+					trace("Error on CSS! Unknown Identifier: height. Word: " + i);
+					return;
+				} else
+					sprites[lastSprite].height = Std.parseInt(words[i + 1].replace("px", ""));
+			} else if (word == "background-position:") {
+				if (lastSprite == null && curlyOpened) {
+					trace("Error on CSS! Unknown Identifier: background-position. Word: " + i);
+					return;
+				} else
+					sprites[lastSprite].background_position.set(Std.parseInt(words[i + 1].replace("px", "")) * -1, Std.parseInt(words[i + 2].replace("px", "")) * -1);
+			}
 		}
 
-		return sprites;
+		for (key => value in sprites) {
+			trace(key + ": " + haxe.Json.stringify(value));
+		}
 	}
 }

@@ -1,50 +1,67 @@
 package idea.scripts;
 
-import flixel.FlxG;
-import sys.io.File;
-import hscript.Parser;
-import hscript.Interp;
+import idea.scripts.FunkinLua;
+import tea.SScript;
 
-class FunkinHScript {
-    public var interp:Interp = new Interp();
-    public var parser:Parser = new Parser();
+class FunkinHScript extends SScript {
+    public var scriptName:String = "";
 
-    public function new(file:String) {
-        if (file != null && file.length > 0) {
-            try {
-                interp.execute(parser.parseString(File.getContent(file)));
-            } catch(e:Dynamic)
-                alert(e);
-        }
+    public function new(script:String) {
+        #if HSCRIPT_ALLOWED
+        super(script, false, false);
 
-        set("import", function(name:String, as:String) {
-            var array:Array<String> = name.split(".");
-            var pack:String = "";
-            while (array.length > 1) {
-                pack += array[0] + ".";
-                array.shift();
-            }
-            var name:String = array[0];
+        scriptName = script;
+        trace("hscript loaded succesfully: " + script);
 
-            set(name, Type.resolveClass(pack + name));
-        });
+        set("scriptName", script);
+        set("this", this);
+        set("game", PlayState.instance);
+
+		// just fuckin' psych support
+        #if windows
+		set("buildTarget", "windows");
+		#elseif linux
+		set("buildTarget", "linux");
+		#elseif mac
+		set("buildTarget", "mac");
+		#elseif html5
+		set("buildTarget", "browser");
+		#elseif android
+		set("buildTarget", "android");
+		#else
+		set("buildTarget", "unknown");
+		#end
+
+        set('customSubstate', CustomSubstate.instance);
+		set('customSubstateName', CustomSubstate.name);
+
+        set('Function_Stop', FunkinLua.Function_Stop);
+		set('Function_Continue', FunkinLua.Function_Continue);
+		set('Function_StopLua', FunkinLua.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
+		set('Function_StopHScript', FunkinLua.Function_StopHScript);
+		set('Function_StopAll', FunkinLua.Function_StopAll);
+    
+        set("add", PlayState.instance.add);
+		set("addBehindGF", PlayState.instance.addBehindGF);
+		set("addBehindDad", PlayState.instance.addBehindDad);
+		set("addBehindBF", PlayState.instance.addBehindBF);
+		set("insert", PlayState.instance.insert);
+		set("remove", PlayState.instance.remove);
+        set("luaTrace", FunkinLua.luaTrace);
+        #else
+        super("", false, false);
+        #end
     }
 
-    public function set(name:String, value:Dynamic) {
-        interp.variables.set(name, value);
-    }
+    #if (SScript >= "3.0.3")
+	override function destroy() {
+		scriptName = null;
 
-    public function call(event:String, args:Array<Dynamic>):Dynamic {
-        if (interp.variables.exists(event)) {
-            try {
-                return Reflect.callMethod(interp.variables, interp.variables[event], args);
-            } catch(e:Dynamic)
-                alert(e);
-        }
-        return null;
-    }
-
-    public function alert(e:Dynamic) {
-        FlxG.stage.application.window.alert(e, "Error on HScript!");
-    }
+		super.destroy();
+	}
+	#else
+	public function destroy() {
+		active = false;
+	}
+	#end
 }

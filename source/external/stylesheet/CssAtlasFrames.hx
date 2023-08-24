@@ -2,22 +2,20 @@ package external.stylesheet;
 
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.graphics.frames.FlxAtlasFrames;
-#if MODS_ALLOWED
+import openfl.utils.Assets;
 import sys.io.File;
 import sys.FileSystem;
-#else
-import openfl.utils.Assets;
-#end
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
 
 using StringTools;
 
 class CssAtlasFrames {
-	public static function build(path:String) {
+    public static function build(path:String):FlxAtlasFrames
+	{
 		var graphic:FlxGraphic = FlxG.bitmap.add(Paths.image(path));
-		var description:String = "";
+		var description:String = null;
 		#if MODS_ALLOWED
 		if (FileSystem.exists(Paths.modFolders("images/" + path + ".css")))
 			description = File.getContent(Paths.modFolders("images/" + path + ".css"));
@@ -33,20 +31,11 @@ class CssAtlasFrames {
 			return frames;
 
 		frames = new FlxAtlasFrames(graphic);
-
-		var sprites:Array<CssSprite> = CssParser.getSprites(description);
-		for (sprite in sprites) {
-			if (sprite.tag != "") {
-				var tag:String = sprite.tag;
-				var width:Int = sprite.width;
-				var height:Int = sprite.height;
-				var pos:Array<Float> = [sprite.background_position.x, sprite.background_position.y];
-
-				var region:FlxRect = FlxRect.get(pos[0], pos[1], width, height);
-				var offsets:FlxPoint = FlxPoint.get();
-
-				frames.addAtlasFrame(region, FlxPoint.get(region.width, region.height), offsets, tag);
-			}
+		
+		var css:CssParser = new CssParser(description);
+		for (key => value in css.sprites) {
+			var rect:FlxRect = new FlxRect(value.background_position.x, value.background_position.y, value.width, value.height);
+			frames.addAtlasFrame(rect, new FlxPoint(rect.width, rect.height), new FlxPoint(), key, 0);
 		}
 
 		return frames;

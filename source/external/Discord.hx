@@ -12,6 +12,9 @@ using StringTools;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
+	inline static var _defaultID:String = "1137375335839698944";
+	public static var clientID(default, set):String = _defaultID;
+
 	public function new() {
 		trace("Discord Client starting...");
 		DiscordRpc.start({
@@ -81,11 +84,16 @@ class DiscordClient
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State) {
-		Lua_helper.add_callback(lua, "changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-		});
+	private static function set_clientID(newID:String) {
+		var change:Bool = (clientID != newID);
+		clientID = newID;
+
+		if (change && isInitialized) {
+			shutdown();
+			isInitialized = false;
+			initialize();
+			DiscordRpc.process();
+		}
+		return newID;
 	}
-	#end
 }

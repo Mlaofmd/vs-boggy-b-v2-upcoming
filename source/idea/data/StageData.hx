@@ -8,7 +8,7 @@ import openfl.utils.Assets;
 #end
 import haxe.Json;
 import haxe.format.JsonParser;
-import idea.system.song.Song;
+import idea.backend.Song;
 
 using StringTools;
 

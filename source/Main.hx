@@ -7,7 +7,7 @@ import openfl.events.UncaughtErrorEvent;
 #end
 
 #if desktop
-import external.Discord.DiscordClient;
+import external.Discord;
 #end
 
 import flixel.FlxG;
@@ -42,6 +42,7 @@ class Main extends Sprite {
 
 	public static var fpsVar:FieldFPS;
 	public static var achieveVar:AchievementToastManager;
+	public static var discordVar:DiscordClient;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -113,27 +114,6 @@ class Main extends Sprite {
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
-
-		FlxG.signals.gameResized.add(function(width:Int, height:Int) {
-			if (FlxG.cameras != null) {
-			  	for (cam in FlxG.cameras.list) {
-			   		@:privateAccess {
-						if (cam != null && cam._filters != null)
-							resetSpriteCache(cam.flashSprite);
-					}
-			  	}
-			}
-
-			if (FlxG.game != null)
-				resetSpriteCache(FlxG.game);
-	   });
-	}
-
-	static function resetSpriteCache(sprite:Sprite) {
-		@:privateAccess {
-		    sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
-		}
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!

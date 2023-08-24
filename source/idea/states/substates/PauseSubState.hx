@@ -1,6 +1,6 @@
 package idea.states.substates;
 
-import idea.system.Controls.Control;
+import idea.backend.Controls.Control;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
