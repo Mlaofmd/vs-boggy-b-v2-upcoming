@@ -41,8 +41,6 @@ class Main extends Sprite {
 	};
 
 	public static var fpsVar:FieldFPS;
-	public static var achieveVar:AchievementToastManager;
-	public static var discordVar:DiscordClient;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -84,17 +82,11 @@ class Main extends Sprite {
         
         #if !mobile
 		fpsVar = new FieldFPS(10, 3);
-		addChild(fpsVar);
+		FlxG.game.addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = NO_SCALE;
-		if(fpsVar != null) {
+		if (fpsVar != null)
 			fpsVar.visible = ClientPrefs.data.showFPS;
-		}
-		#end
-
-		#if ACHIEVEMENTS_ALLOWED
-		achieveVar = new AchievementToastManager();
-		addChild(achieveVar);
 		#end
 
 		#if html5

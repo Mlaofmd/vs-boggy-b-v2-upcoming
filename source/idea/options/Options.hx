@@ -734,27 +734,6 @@ class ColorblindOption extends Option {
 	}
 }
 
-class GPURenderOption extends Option {
-	public function new(desc:String) {
-		super();
-		description = (OptionsMenu.isInPause ? Option.PAUSE_MSG : desc);
-	}
-
-	override function press():Bool {
-		if (OptionsMenu.isInPause)
-			return false;
-		
-		ClientPrefs.data.gpuRender = !ClientPrefs.data.gpuRender;
-
-		display = updateDisplay();
-		return true;
-	}
-
-	override function updateDisplay():String {
-		return "GPU Render: " + (ClientPrefs.data.gpuRender ? "Enabled" : "Disabled");
-	}
-}
-
 class FPSCapOption extends Option {
 	public function new(desc:String)  {
 		super();

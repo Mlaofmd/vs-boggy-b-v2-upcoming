@@ -66,8 +66,6 @@ class HealthIcon extends FlxSprite
 			while (!Paths.fileExists("images/icons/" + names[0] + ".png", IMAGE) && names.length > 0)
 				names.shift();
 
-			trace(names[0]);
-
 			if (Paths.fileExists("images/icons/" + names[0] + ".json", TEXT)) {
 				var json:HealthIconFile = Json.parse(Paths.getTextFromFile("images/icons/" + names[0] + ".json"));
 
@@ -80,7 +78,7 @@ class HealthIcon extends FlxSprite
 				updateHitbox();
 
 				if (json.frames != null && json.frames.length > 0) {
-					frames = new FlxAtlasFrames(graphic);
+					frames = new FlxAtlasFrames(file);
 					for (frame in json.frames) {
 						var rect:FlxRect = new FlxRect(frame.x, frame.y, frame.width, frame.height);
 						frames.addSpriteSheetFrame(rect);

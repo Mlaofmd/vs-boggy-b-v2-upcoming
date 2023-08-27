@@ -130,7 +130,6 @@ class OptionsMenu extends MusicBeatSubstate {
 			]),
 			new OptionCata(640, 40, "Misc", [
                 new ColorblindOption("You can set colorblind filter. (makes the game more playable for colorblind people)"),
-				new GPURenderOption("Toggle textures loading with graphic card."),
 				#if !web new FPSCapOption("Change your FPS Cap."), #end
 				new FPSOption("Toggle FPS Counter."),
 				new FlashingOption("Toggle flashing lights that can cause epileptic seizures and strain."),

@@ -18,7 +18,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import lime.net.curl.CURLCode;
 import flixel.graphics.FlxGraphic;
-import idea.data.WeekData;
+import idea.backend.WeekData;
 
 using StringTools;
 
@@ -176,7 +176,7 @@ class StoryMenuState extends MusicBeatState {
 		txtTracklist.font = rankText.font;
 		txtTracklist.color = 0xFFe55777;
 		add(txtTracklist);
-		add(rankText);
+		// add(rankText);
 		add(scoreText);
 		add(txtWeekTitle);
 

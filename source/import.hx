@@ -4,8 +4,6 @@ import idea.backend.*;
 
 import idea.cutscenes.*;
 
-import idea.data.*;
-
 import idea.objects.*;
 
 import idea.options.*;

@@ -50,8 +50,8 @@ class MainMenuState extends MusicBeatState
 		#if MODS_ALLOWED
 		Paths.pushGlobalMods();
 		#end
-		WeekData.loadTheFirstEnabledMod();
-		AchievementData.loadAchievements();
+		Mods.loadTheFirstEnabledMod();
+		Achievements.loadAchievements();
 
 		#if desktop
 		// Updating Discord Rich Presence
@@ -140,13 +140,29 @@ class MainMenuState extends MusicBeatState
 		// NG.core.calls.event.logEvent("swag").send();
 
 		#if ACHIEVEMENTS_ALLOWED
-		var leDate:Date = Date.now();
-		if (leDate.getDay() == 5 && leDate.getHours() >= 18)
-			Main.achieveVar.giveAchievement("friday_night_play");
+		Achievements.loadAchievements();
+		var leDate = Date.now();
+		if (leDate.getDay() == 5 && leDate.getHours() >= 18) {
+			var achieveID:Int = Achievements.getAchievementIndex('friday_night_play');
+			if(!Achievements.isAchievementUnlocked(Achievements.achievementsStuff[achieveID][2])) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
+				Achievements.achievementsMap.set(Achievements.achievementsStuff[achieveID][2], true);
+				giveAchievement();
+				ClientPrefs.saveSettings();
+			}
+		}
 		#end
 
 		super.create();
 	}
+
+	#if ACHIEVEMENTS_ALLOWED
+	// Unlocks "Freaky on a Friday Night" achievement
+	function giveAchievement() {
+		add(new AchievementToast('friday_night_play', camAchievement));
+		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+		trace('Giving achievement "friday_night_play"');
+	}
+	#end
 
 	var selectedSomethin:Bool = false;
 

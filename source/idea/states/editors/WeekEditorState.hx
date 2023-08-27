@@ -35,7 +35,7 @@ import haxe.Json;
 import sys.io.File;
 import sys.FileSystem;
 #end
-import idea.data.WeekData;
+import idea.backend.WeekData;
 
 using StringTools;
 

@@ -44,13 +44,13 @@ class ResultsScreen extends MusicBeatSubstate {
         FlxTween.tween(comboText, {y: 145}, 0.5, {ease: FlxEase.expoInOut});
         FlxTween.tween(continueText, {y: FlxG.height - 45}, 0.5, {ease: FlxEase.expoInOut});
 
-        cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+        cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 2]];
 
         super.create();
     }
 
     override function update(elapsed:Float) {
-        if (controls.ACCEPT) {
+        if (controls.ACCEPT && PlayState.instance.canProceed) {
             close();
             PlayState.instance.closeResultsMenu();
         }

@@ -19,7 +19,7 @@ class AttachedAchievement extends FlxSprite {
 	}
 
 	public function reloadAchievementImage() {
-		if (AchievementData.isAchievementUnlocked(tag))
+		if (Achievements.isAchievementUnlocked(tag))
 			loadGraphic(Paths.image("achievements/" + tag));
 		else
 			loadGraphic(Paths.image("achievements/lockedachievement"));

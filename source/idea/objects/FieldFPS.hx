@@ -4,19 +4,12 @@ import flixel.math.FlxMath;
 import openfl.Lib;
 import openfl.events.Event;
 import flixel.FlxG;
-import openfl.utils.Assets;
-import lime.text.Font;
 import openfl.text.TextFormat;
 import flixel.util.FlxColor;
-import openfl.display.Bitmap;
 import openfl.text.TextField;
-import openfl.display.Sprite;
 
-class FieldFPS extends Sprite {
+class FieldFPS extends TextField {
     public var currentFPS(default, null):Int;
-
-    private var source:TextField;
-    private var output:Bitmap;
 
     @:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
@@ -24,33 +17,15 @@ class FieldFPS extends Sprite {
 
     public function new(x:Float = 10, y:Float = 10) {
         super();
+        this.x = x;
+        this.y = y;
+        selectable = false;
+        mouseEnabled = false;
+        defaultTextFormat = new TextFormat(Paths.limeFont("vcr.ttf").name, 14, FlxColor.WHITE);
+        autoSize = LEFT;
+        multiline = true;
 
-        if (stage != null)
-            create();
-        else
-            addEventListener(Event.ADDED_TO_STAGE, create);
-    }
-
-    private function create(?e:Event) {
-        if (hasEventListener(Event.ADDED_TO_STAGE))
-            removeEventListener(Event.ADDED_TO_STAGE, create);
-        
         currentFPS = 0;
-        
-        source = new TextField();
-        source.x = x;
-        source.y = y;
-        source.selectable = false;
-		source.mouseEnabled = false;
-		source.defaultTextFormat = new TextFormat(Paths.limeFont("vcr.ttf").name, 14, FlxColor.WHITE);
-		source.autoSize = LEFT;
-		source.multiline = true;
-        source.visible = visible;
-        addChild(source);
-
-        // output = ImageOutline.renderImage(source, 1, 0xff000000, true);
-        // output.visible = visible;
-        // addChild(output);
 
         cacheCount = 0;
 		currentTime = 0;
@@ -73,7 +48,7 @@ class FieldFPS extends Sprite {
 
         if (currentCount != cacheCount)
 		{
-            source.text = "FPS: " + currentFPS;
+            text = "FPS: " + currentFPS;
 
             var memoryUsed:Float = Math.abs(FlxMath.roundDecimal(Native.getTotalRAM() / 1000000, 1));
             var memoryPostfix:String = (memoryUsed > 1000 ? "GB" : "MB");
@@ -82,16 +57,8 @@ class FieldFPS extends Sprite {
             else if (memoryUsed > 1000)
                 memoryUsed = FlxMath.roundDecimal(memoryUsed / 1000, 3);
 
-            source.text += "\nMEM: " + memoryUsed + memoryPostfix;
+            text += "\nMEM: " + memoryUsed + memoryPostfix;
 		}
-
-        source.visible = visible;
-        // removeChild(output);
-
-        // output = ImageOutline.renderImage(source, 1, 0xff000000, true);
-        // output.visible = visible;
-
-        // addChild(output);
 
         cacheCount = currentCount;
     }

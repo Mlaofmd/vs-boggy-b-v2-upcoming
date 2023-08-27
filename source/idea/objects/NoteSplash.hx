@@ -1,9 +1,9 @@
 package idea.objects;
 
-import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
+
+using StringTools;
 
 class NoteSplash extends FlxSprite
 {
@@ -14,17 +14,16 @@ class NoteSplash extends FlxSprite
 	public var skin:String = "noteSplashes";
 
 	public var noteData:Int = 0;
+	private var parentStrum:StrumNote = null;
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0, isSustain:Bool = false) {
 		super(x, y);
 		this.isSustain = isSustain;
 		noteData = note;
 
-		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin != skin && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
-
-		/*if (PlayState.SONG.extraSkin != null && PlayState.SONG.extraSkin != sustainSkin && PlayState.SONG.extraSkin.length > 0)
-			sustainSkin = PlayState.SONG.extraSkin;*/
+		var _song = PlayState.SONG;
+		if (_song.splashSkin != null && _song.splashSkin.trim().length > 0)
+			skin = _song.splashSkin;
 
 		loadAnims(skin);
 		
@@ -39,14 +38,10 @@ class NoteSplash extends FlxSprite
 		noteData = note;
 
 		if (textureLoaded != texture) {
-			if (texture == null) {
-				texture = (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) ? PlayState.SONG.splashSkin : skin;
-			}
+			if (texture == null)
+				texture = skin;
 
 			loadAnims(texture);
-			animation.finishCallback = function(name:String) {
-				kill();
-			}
 
 			playAnim();
 		}
@@ -62,17 +57,11 @@ class NoteSplash extends FlxSprite
 			setPosition(x - width * 0.25, y + height * (ClientPrefs.data.downScroll ? 1 : 0.41));
 			flipY = ClientPrefs.data.downScroll;
 
-			if (strum != null) {
-				for (i in 0...Std.int(width)) {
-					for (j in 0...Std.int(height)) {
-						var noteColor:FlxColor = strum.pixels.getPixel32(Std.int(x - strum.x) + i, Std.int(y - strum.y) + j);
-						/*if (noteColor.alphaFloat == 1)
-							framePixels.setPixel32(Std.int(x + i), Std.int(y + j), FlxColor.TRANSPARENT);*/
-					}
-				}
-			}
+			parentStrum = strum;
 		} else {
 			alpha = 0.6;
+			if (animation.curAnim != null)
+				animation.curAnim.frameRate = 24 + FlxG.random.int(-3, 4);
 			angle = FlxG.random.int(-10, 10);
 			setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 			offset.set(-20); // пиздец костыли
@@ -93,5 +82,12 @@ class NoteSplash extends FlxSprite
             animation.addByPrefix("note3-" + i, animPrefix + " splash red " + i, 24, false);
         }
 		textureLoaded = skin;
+	}
+
+	override function update(elapsed:Float) {
+		if (animation.curAnim != null && animation.curAnim.finished)
+			kill();
+
+		super.update(elapsed);
 	}
 }

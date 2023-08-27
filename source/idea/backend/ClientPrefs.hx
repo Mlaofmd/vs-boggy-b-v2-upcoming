@@ -5,7 +5,6 @@ import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 
 class SaveVariables {
-	public var gpuRender:Bool = true;
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
@@ -37,6 +36,7 @@ class SaveVariables {
 	public var checkForUpdates:Bool = true;
 	public var comboStacking:Bool = true;
     public var colorblind:String = "None";
+	public var showMsText:Bool = true;
 	public var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -128,7 +128,7 @@ class ClientPrefs {
 		FlxG.save.data.healthBarColors = data.healthBarColors;
 		FlxG.save.data.comboOffset = data.comboOffset;
 
-		FlxG.save.data.achievementsMap = Achievements.achievementsMap;
+		FlxG.save.backend.AchievementsMap = Achievements.achievementsMap;
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
 
 		FlxG.save.data.ratingOffset = data.ratingOffset;

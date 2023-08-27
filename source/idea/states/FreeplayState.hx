@@ -20,7 +20,7 @@ import flixel.sound.FlxSound;
 import flixel.system.FlxSound;
 #end
 import openfl.utils.Assets as OpenFlAssets;
-import idea.data.WeekData;
+import idea.backend.WeekData;
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
@@ -91,7 +91,7 @@ class FreeplayState extends MusicBeatState
 				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
 			}
 		}
-		WeekData.loadTheFirstEnabledMod();
+		Mods.loadTheFirstEnabledMod();
 
 		/*		//KIND OF BROKEN NOW AND ALSO PRETTY USELESS//
 

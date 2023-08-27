@@ -1156,8 +1156,7 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
-				var color:Int = Std.parseInt(targetColor);
-				if(!targetColor.startsWith('0x')) color = Std.parseInt('0xff' + targetColor);
+				var color:Int = CoolUtil.colorFromString(targetColor);
 
 				var curColor:FlxColor = penisExam.color;
 				curColor.alphaFloat = penisExam.alpha;
@@ -1559,7 +1558,7 @@ class FunkinLua {
 			PlayState.changedDifficulty = false;
 			PlayState.chartingMode = false;
 			PlayState.instance.transitioning = true;
-			WeekData.loadTheFirstEnabledMod();
+			Mods.loadTheFirstEnabledMod();
 			return true;
 		});
 		Lua_helper.add_callback(lua, "getSongPosition", function() {
@@ -1737,8 +1736,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int, height:Int, color:String) {
-			var colorNum:Int = Std.parseInt(color);
-			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
+			var colorNum:Int = CoolUtil.colorFromString(color);
 
 			var spr:FlxSprite = PlayState.instance.getLuaObject(obj,false);
 			if(spr!=null) {

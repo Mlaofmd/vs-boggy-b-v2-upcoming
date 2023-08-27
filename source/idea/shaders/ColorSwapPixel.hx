@@ -9,6 +9,8 @@ class ColorSwapPixel {
     public var brightness(default, set):Float = 0;
     public var uBlockSize(default, set):Float = 1;
 
+    public var pixelsDisabled:Array<Array<Int>> = [];
+
     public function set_hue(value:Float):Float {
         hue = value;
         shader.data.hue.value = [value];

@@ -1,20 +1,12 @@
 package idea.backend;
 
-import openfl.display3D.textures.Texture;
 import lime.text.Font;
-import external.animateatlas.AtlasFrameMaker;
-import flixel.math.FlxPoint;
-import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
-import openfl.geom.Rectangle;
-import flixel.math.FlxRect;
-import haxe.xml.Access;
 import openfl.system.System;
 import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import lime.utils.Assets;
-import flixel.FlxSprite;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -342,28 +334,14 @@ class Paths
 		return hideChars.split(path).join("").toLowerCase();
 	}
 
-	// completely rewritten asset loading? fuck!
-	public static var currentTrackedTextures:Map<String, Texture> = [];
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-	public static function returnGraphic(key:String, ?library:String, ?gpuRender:Bool = true) {
+	public static function returnGraphic(key:String, ?library:String) {
 		#if MODS_ALLOWED
 		var modKey:String = modsImages(key);
-		if (FileSystem.exists(modKey)) {
-			if (!currentTrackedAssets.exists(modKey)) {
+		if(FileSystem.exists(modKey)) {
+			if(!currentTrackedAssets.exists(modKey)) {
 				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
-				var newGraphic:FlxGraphic;
-
-				if (ClientPrefs.data.gpuRender && gpuRender) {
-					var newTexture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, false);
-					newTexture.uploadFromBitmapData(newBitmap);
-					currentTrackedTextures.set(modKey, newTexture);
-					newBitmap.dispose();
-					newBitmap.disposeImage();
-					newBitmap = null;
-					newGraphic = FlxG.bitmap.add(BitmapData.fromTexture(newTexture), false, modKey);
-				} else {
-					newGraphic = FlxG.bitmap.add(newBitmap, false, modKey);
-				}
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(modKey, newGraphic);
 			}
@@ -373,31 +351,17 @@ class Paths
 		#end
 
 		var path = getPath('images/$key.png', IMAGE, library);
+		//trace(path);
 		if (OpenFlAssets.exists(path, IMAGE)) {
 			if(!currentTrackedAssets.exists(path)) {
-	
-     			var newBitmap:BitmapData = OpenFlAssets.getBitmapData(path);
-				var newGraphic:FlxGraphic;
-
-				(ClientPrefs.data.gpuRender && gpuRender) ? {
-					var newTexture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, false);
-					newTexture.uploadFromBitmapData(newBitmap);
-					currentTrackedTextures.set(path, newTexture);
-					newBitmap.dispose();
-					newBitmap.disposeImage();
-					newBitmap = null;
-					newGraphic = FlxG.bitmap.add(BitmapData.fromTexture(newTexture), false, path);
-				} : {
-					newGraphic = FlxG.bitmap.add(path, false, path);
-				}
+				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(path, newGraphic);
 			}
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-
-		trace('oh no ' + key + ' returning null NOOOO');
+		trace('oh no its returning null NOOOO');
 		return null;
 	}
 
@@ -554,5 +518,15 @@ class Paths
 		#else
 		return Assets.getFont(Paths.font(path));
 		#end
+	}
+
+	public static function fromActiveMod(key:String):String {
+		if (currentModDirectory != null && currentModDirectory.length > 0) {
+			var fileToCheck:String = mods(currentModDirectory + "/" + key);
+			if (FileSystem.exists(fileToCheck))
+				return fileToCheck;
+		}
+
+		return "mods/" + key;
 	}
 }

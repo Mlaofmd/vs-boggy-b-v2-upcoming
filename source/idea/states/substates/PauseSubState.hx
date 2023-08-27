@@ -19,6 +19,8 @@ import flixel.util.FlxColor;
 import flixel.FlxCamera;
 import flixel.util.FlxStringUtil;
 
+using StringTools;
+
 class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
@@ -64,6 +66,10 @@ class PauseSubState extends MusicBeatSubstate
 			difficultyChoices.push(diff);
 		}
 		difficultyChoices.push("BACK");
+
+		var _song = PlayState.SONG;
+		if (_song.pauseMusic != null && _song.pauseMusic.trim().length > 0)
+			songName = _song.pauseMusic;
 
 		if (pauseMusic == null) {
 			pauseMusic = new FlxSound();
@@ -137,7 +143,7 @@ class PauseSubState extends MusicBeatSubstate
 		add(grpMenuShit);
 
 		regenMenu();
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 2]];
 	}
 
 	var holdTime:Float = 0;
@@ -262,7 +268,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.deathCounter = 0;
 					PlayState.seenCutscene = false;
 
-					WeekData.loadTheFirstEnabledMod();
+					Mods.loadTheFirstEnabledMod();
 					if(PlayState.isStoryMode) {
 						MusicBeatState.switchState(new StoryMenuState());
 					} else {

@@ -1,12 +1,18 @@
-/*#if cpp
+#if cpp
 #if windows
-@:cppFileCode("include <sysinfoapi.h>")
+@:cppFileCode('
+    #include <Windows.h>
+')
 #elseif mac
-@:cppFileCode("include <sys/sysctl.h>")
+@:cppFileCode('
+    #include <sys/sysctl.h>
+')
 #elseif linux
-@:cppFileCode("include <sdtio.h>")
+@:cppFileCode('
+    #include <sdtio.h>
+')
 #end
-#end*/
+#end
 
 class Native {
     /*#if cpp
@@ -47,7 +53,7 @@ class Native {
         return 0;
     ')
     #end
-    #end*/
+    #end*/ // its returns 17mb lmao
     public static function getTotalRAM():Float {
         return openfl.system.System.totalMemory;
     }

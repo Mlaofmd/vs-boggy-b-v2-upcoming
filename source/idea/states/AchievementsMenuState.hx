@@ -1,6 +1,5 @@
 package idea.states;
 
-import sys.FileSystem;
 #if desktop
 import external.Discord.DiscordClient;
 #end
@@ -14,25 +13,26 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 import flixel.FlxSubState;
-import idea.data.AchievementData;
+import idea.backend.Achievements;
 
 using StringTools;
 
-class AchievementsMenuState extends MusicBeatState {
+class AchievementsMenuState extends MusicBeatState
+{
 	#if ACHIEVEMENTS_ALLOWED
-	public var options:Array<String> = [];
-	public var grpOptions:FlxTypedGroup<Alphabet>;
-	public static var curSelected:Int = 0;
-	public var achievementArray:Array<AttachedAchievement> = [];
-	public var achievements:Array<AchievementData> = [];
-	public var descText:FlxText;
+	var options:Array<String> = [];
+	private var grpOptions:FlxTypedGroup<Alphabet>;
+	private static var curSelected:Int = 0;
+	private var achievementArray:Array<AttachedAchievement> = [];
+	private var achievementIndex:Array<Int> = [];
+	private var descText:FlxText;
 
 	override function create() {
 		#if desktop
 		DiscordClient.changePresence("Achievements Menu", null);
 		#end
 
-		var menuBG:FlxSprite = new FlxSprite(Paths.image('menuBGBlue'));
+		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBGBlue'));
 		menuBG.setGraphicSize(Std.int(menuBG.width * 1.1));
 		menuBG.updateHitbox();
 		menuBG.screenCenter();
@@ -42,17 +42,17 @@ class AchievementsMenuState extends MusicBeatState {
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		AchievementData.loadAchievements();
-		for (achieve in AchievementData.achievementsList) {
-			if (!AchievementData.achievementsLoaded[achieve].hidden || (AchievementData.achievementsMap.exists(achieve) && AchievementData.achievementsMap[achieve])) {
-				options.push(achieve);
-				achievements.push(AchievementData.achievementsLoaded[achieve]);
+		Achievements.loadAchievements();
+		for (i in 0...Achievements.achievementsStuff.length) {
+			if(!Achievements.achievementsStuff[i][3] || Achievements.achievementsMap.exists(Achievements.achievementsStuff[i][2])) {
+				options.push(Achievements.achievementsStuff[i]);
+				achievementIndex.push(i);
 			}
 		}
 
 		for (i in 0...options.length) {
-			var achieveName:String = achievements[i].name;
-			var optionText:Alphabet = new Alphabet(280, 300, AchievementData.isAchievementUnlocked(achievements[i].fileName) ? achieveName : "?", false);
+			var achieveName:String = Achievements.achievementsStuff[achievementIndex[i]][2];
+			var optionText:Alphabet = new Alphabet(280, 300, Achievements.isAchievementUnlocked(achieveName) ? Achievements.achievementsStuff[achievementIndex[i]][0] : '?', false);
 			optionText.isMenuItem = true;
 			optionText.targetY = i - curSelected;
 			optionText.snapToPosition();
@@ -75,6 +75,8 @@ class AchievementsMenuState extends MusicBeatState {
 	}
 
 	override function update(elapsed:Float) {
+		super.update(elapsed);
+
 		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
@@ -86,11 +88,9 @@ class AchievementsMenuState extends MusicBeatState {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
-
-		super.update(elapsed);
 	}
 
-	public function changeSelection(change:Int = 0) {
+	function changeSelection(change:Int = 0) {
 		curSelected += change;
 		if (curSelected < 0)
 			curSelected = options.length - 1;
@@ -109,10 +109,13 @@ class AchievementsMenuState extends MusicBeatState {
 			}
 		}
 
-		for (i in 0...achievementArray.length)
-			achievementArray[i].alpha = (i == curSelected ? 1 : 0.6);
-
-		descText.text = achievements[curSelected].description;
+		for (i in 0...achievementArray.length) {
+			achievementArray[i].alpha = 0.6;
+			if(i == curSelected) {
+				achievementArray[i].alpha = 1;
+			}
+		}
+		descText.text = Achievements.achievementsStuff[achievementIndex[curSelected]][1];
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 	}
 	#end

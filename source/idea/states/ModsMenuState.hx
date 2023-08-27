@@ -752,8 +752,8 @@ class ModMetadata
 				if (stuff.restart != null)
 					restart = stuff.restart;
 
-				if (stuff.discord_rpc != null && stuff.discord_rpc.length > 0)
-					discordRPC = stuff.discord_rpc;
+				if (stuff.discordRPC != null && stuff.discordRPC.length > 0)
+					discordRPC = stuff.discordRPC;
 			}
 		}
 	}

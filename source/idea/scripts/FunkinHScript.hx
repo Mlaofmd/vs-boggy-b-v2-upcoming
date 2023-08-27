@@ -17,7 +17,6 @@ class FunkinHScript extends SScript {
         set("this", this);
         set("game", PlayState.instance);
 
-		// just fuckin' psych support
         #if windows
 		set("buildTarget", "windows");
 		#elseif linux
@@ -48,6 +47,9 @@ class FunkinHScript extends SScript {
 		set("insert", PlayState.instance.insert);
 		set("remove", PlayState.instance.remove);
         set("luaTrace", FunkinLua.luaTrace);
+
+		preset();
+		execute();
         #else
         super("", false, false);
         #end

@@ -101,7 +101,8 @@ class ChartingState extends MusicBeatState
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		['Set Property', "Value 1: Variable name\nValue 2: New value"]
+		['Set Property', "Value 1: Variable name\nValue 2: New value"],
+		["Play Sound", "Value 1: Sound name\nValue 2: Sound volume"]
 	];
 
 	var _file:FileReference;
@@ -339,6 +340,7 @@ class ChartingState extends MusicBeatState
 			{name: "Note", label: 'Note'},
 			{name: "Events", label: 'Events'},
 			{name: "Charting", label: 'Charting'},
+			{name: "Vars", label: "Vars"}
 		];
 
 		UI_box = new FlxUITabMenu(null, tabs, true);
@@ -380,6 +382,7 @@ class ChartingState extends MusicBeatState
 		addNoteUI();
 		addEventsUI();
 		addChartingUI();
+		addVarsUI();
 		updateHeads();
 		updateWaveform();
 		//UI_box.selected_tab = 4;
@@ -409,8 +412,6 @@ class ChartingState extends MusicBeatState
 	var playSoundBf:FlxUICheckBox = null;
 	var playSoundDad:FlxUICheckBox = null;
 	var UI_songTitle:FlxUIInputText;
-	var noteSkinInputText:FlxUIInputText;
-	var noteSplashesInputText:FlxUIInputText;
 	var stageDropDown:FlxUIDropDownMenuCustom;
 	var sliderRate:FlxUISlider;
 	function addSongUI():Void
@@ -610,11 +611,6 @@ class ChartingState extends MusicBeatState
 		noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, _song.splashSkin, 8);
 		blockPressWhileTypingOn.push(noteSplashesInputText);
 
-		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
-			_song.arrowSkin = noteSkinInputText.text;
-			updateGrid();
-		});
-
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
@@ -630,9 +626,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(loadEventJson);
 		tab_group_song.add(stepperBPM);
 		tab_group_song.add(stepperSpeed);
-		tab_group_song.add(reloadNotesButton);
-		tab_group_song.add(noteSkinInputText);
-		tab_group_song.add(noteSplashesInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		tab_group_song.add(new FlxText(stepperBPM.x + 100, stepperBPM.y - 15, 0, 'Song Offset:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
@@ -640,8 +633,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
 		tab_group_song.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Boyfriend:'));
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
-		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
-		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -1354,6 +1345,79 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_chart);
 	}
 
+	var gameOverCharacterInputText:FlxUIInputText;
+	var gameOverSoundInputText:FlxUIInputText;
+	var gameOverLoopInputText:FlxUIInputText;
+	var gameOverEndInputText:FlxUIInputText;
+	var skipCountdownCheckbox:FlxUICheckBox;
+	var countdownInputText:FlxUIInputText;
+	var pauseMusicInputText:FlxUIInputText;
+	var noteSkinInputText:FlxUIInputText;
+	var noteSplashesInputText:FlxUIInputText;
+	function addVarsUI() {
+		var tab_group_vars = new FlxUI(null, UI_box);
+		tab_group_vars.name = "Vars";
+
+		gameOverCharacterInputText = new FlxUIInputText(10, 25, 150, _song.gameOverChar != null ? _song.gameOverChar : '', 8);
+		blockPressWhileTypingOn.push(gameOverCharacterInputText);
+		
+		gameOverSoundInputText = new FlxUIInputText(10, gameOverCharacterInputText.y + 35, 150, _song.gameOverSound != null ? _song.gameOverSound : '', 8);
+		blockPressWhileTypingOn.push(gameOverSoundInputText);
+		
+		gameOverLoopInputText = new FlxUIInputText(10, gameOverSoundInputText.y + 35, 150, _song.gameOverLoop != null ? _song.gameOverLoop : "", 8);
+		blockPressWhileTypingOn.push(gameOverLoopInputText);
+		
+		gameOverEndInputText = new FlxUIInputText(10, gameOverLoopInputText.y + 35, 150, _song.gameOverEnd != null ? _song.gameOverEnd : "", 8);
+		blockPressWhileTypingOn.push(gameOverEndInputText);
+
+		skipCountdownCheckbox = new FlxUICheckBox(10, gameOverEndInputText.y + 35, null, null, "Skip Countdown", 120, function() {
+			_song.skipCountdown = skipCountdownCheckbox.checked;
+		});
+		skipCountdownCheckbox.checked = _song.skipCountdown;
+
+		countdownInputText = new FlxUIInputText(10, skipCountdownCheckbox.y + 35, 150, _song.countdown != null ? _song.countdown : "", 8);
+		blockPressWhileTypingOn.push(countdownInputText);
+
+		pauseMusicInputText = new FlxUIInputText(10, countdownInputText.y + 35, 150, _song.pauseMusic != null ? _song.pauseMusic : "", 8);
+		blockPressWhileTypingOn.push(pauseMusicInputText);
+
+		noteSkinInputText = new FlxUIInputText(10, 280, 150, _song.arrowSkin != null ? _song.arrowSkin : "", 8);
+		blockPressWhileTypingOn.push(noteSkinInputText);
+
+		noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, _song.splashSkin != null ? _song.splashSkin : '', 8);
+		blockPressWhileTypingOn.push(noteSplashesInputText);
+
+		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, "Change Notes", function() {
+			_song.arrowSkin = noteSkinInputText.text;
+			updateGrid();
+		});
+		
+		tab_group_vars.add(gameOverCharacterInputText);
+		tab_group_vars.add(gameOverSoundInputText);
+		tab_group_vars.add(gameOverLoopInputText);
+		tab_group_vars.add(gameOverEndInputText);
+
+		tab_group_vars.add(skipCountdownCheckbox);
+		tab_group_vars.add(countdownInputText);
+		tab_group_vars.add(pauseMusicInputText);
+		
+		tab_group_vars.add(reloadNotesButton);
+		tab_group_vars.add(noteSkinInputText);
+		tab_group_vars.add(noteSplashesInputText);
+
+		tab_group_vars.add(new FlxText(gameOverCharacterInputText.x, gameOverCharacterInputText.y - 15, 0, 'Game Over Character Name:'));
+		tab_group_vars.add(new FlxText(gameOverSoundInputText.x, gameOverSoundInputText.y - 15, 0, 'Game Over Death Sound:'));
+		tab_group_vars.add(new FlxText(gameOverLoopInputText.x, gameOverLoopInputText.y - 15, 0, 'Game Over Loop Music:'));
+		tab_group_vars.add(new FlxText(gameOverEndInputText.x, gameOverEndInputText.y - 15, 0, 'Game Over Retry Music:'));
+
+		tab_group_vars.add(new FlxText(countdownInputText.x, countdownInputText.y - 15, 0, 'Countdown Skin (:C: will be replaced by current count):'));
+		tab_group_vars.add(new FlxText(pauseMusicInputText.x, pauseMusicInputText.y - 15, 0, 'Pause Music:'));
+
+		tab_group_vars.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
+		tab_group_vars.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+		UI_box.addGroup(tab_group_vars);
+	}
+
 	function loadSong():Void
 	{
 		if (FlxG.sound.music != null)
@@ -1476,9 +1540,23 @@ class ChartingState extends MusicBeatState
 			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
-			if(sender == noteSplashesInputText) {
+			if (sender == noteSplashesInputText)
 				_song.splashSkin = noteSplashesInputText.text;
-			}
+			else if (sender == noteSkinInputText)
+				_song.arrowSkin = noteSkinInputText.text;
+			else if (sender == gameOverCharacterInputText)
+				_song.gameOverChar = gameOverCharacterInputText.text;
+			else if (sender == gameOverSoundInputText)
+				_song.gameOverSound = gameOverSoundInputText.text;
+			else if (sender == gameOverLoopInputText)
+				_song.gameOverLoop = gameOverLoopInputText.text;
+			else if (sender == gameOverEndInputText)
+				_song.gameOverEnd = gameOverEndInputText.text;
+			else if (sender == countdownInputText)
+				_song.countdown = countdownInputText.text;
+			else if (sender == pauseMusicInputText)
+				_song.pauseMusic = pauseMusicInputText.text;
+
 			else if(curSelectedNote != null)
 			{
 				if(sender == value1InputText) {
