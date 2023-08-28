@@ -1,4 +1,4 @@
-#if cpp
+/*#if cpp
 #if windows
 @:cppFileCode('
     #include <Windows.h>
@@ -12,7 +12,7 @@
     #include <sdtio.h>
 ')
 #end
-#end
+#end*/
 
 class Native {
     /*#if cpp
