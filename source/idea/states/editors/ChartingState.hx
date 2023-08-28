@@ -3012,6 +3012,7 @@ class ChartingState extends MusicBeatState
 			curEventSelected = 0;
 		} else if (noteData == -2) {
 			_song.breakpoints.push(noteStrum);
+			_song.breakpoints.sort(sortBreakpoints);
 			curSelectedNote = [_song.breakpoints[_song.breakpoints.length - 1]];
 		} else {
 			_song.notes[curSec].sectionNotes.push([noteStrum, noteData, noteSus, noteTypeIntMap.get(daType)]);
@@ -3222,6 +3223,10 @@ class ChartingState extends MusicBeatState
 
 		curBreakpoint = targetBreakpoint;
 		trace(curBreakpoint);
+	}
+
+	function sortBreakpoints(obj1:Float, obj2:Float) {
+		return FlxSort.byValues(FlxSort.ASCENDING, obj1, obj2);
 	}
 }
 

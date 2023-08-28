@@ -82,13 +82,13 @@ class CreditsState extends MusicBeatState
 
 		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
 			["Idea Engine Team"],
-			["h4mster",				"h4m",				"Main Programmer of Idea Engine",								"",										"7442C8"],
+			["h4mster",				"h4m",				"Main Programmer of Idea Engine",								"",										"9400D3"],
 			[""],
 			["Special Thanks"],
 			["Shadow Mario",        "shadowmario",      "Main Programmer of Psych Engine",                              "https://twitter.com/Shadow_Mario_",    "444444"],
 			["RiverOaken",          "river",            "Main Artist/Animator of Psych Engine",                         "https://twitter.com/RiverOaken",       "B42F71"],
 			["PurSnake",            "snake",            "Base code for Sustain Note Splashes",                          "https://twitter.com/PurSniki",         "8C41B6"],
-			["KerSive",             "KerSive",          "Sustain Note Splash Animations",                               "",                                     "C2C04A"],
+			["KerSive",             "kersive",          "Sustain Note Splash Animations",                               "",                                     "C2C04A"],
 			["iFlicky",             "flicky",           "Composer of Psync and Tea Time\nMade the Dialogue Sounds",     "https://twitter.com/flicky_i",         "9E29CF"],
 			["SqirraRNG",           "sqirra",           "Crash Handler and Base code for\nChart Editor\'s Waveform",    "https://twitter.com/gedehari",         "E1843A"],
 			["EliteMasterEric",     "mastereric",       "Runtime Shaders support",                                      "https://twitter.com/EliteMasterEric",  "FFBD40"],

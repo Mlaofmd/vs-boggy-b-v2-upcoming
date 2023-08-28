@@ -1022,9 +1022,9 @@ class PlayState extends MusicBeatState
 		emptyColor.alphaFloat = 0.35;
 
 		var fillColor:FlxColor = FlxColor.WHITE;
-		fillColor.red = Math.round(228 / 255);
-		fillColor.green = Math.round(228 / 255);
-		fillColor.blue = Math.round(228 / 255);
+		fillColor.red = 228;
+		fillColor.green = 228;
+		fillColor.blue = 228;
 		fillColor.alphaFloat = 0.75;
 
 		timeBar = new FlxBar(0, ClientPrefs.data.downScroll ? FlxG.height - 8 : 0, LEFT_TO_RIGHT, FlxG.width, 8, this, "songPercent", 0, 1);

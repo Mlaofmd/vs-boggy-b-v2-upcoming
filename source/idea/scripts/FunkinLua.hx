@@ -1385,8 +1385,7 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
-			if(!color.startsWith('0x')) color = '0xff' + color;
-			return Std.parseInt(color);
+			return CoolUtil.colorFromString(color);
 		});
 
 		Lua_helper.add_callback(lua, "keyboardJustPressed", function(name:String)
