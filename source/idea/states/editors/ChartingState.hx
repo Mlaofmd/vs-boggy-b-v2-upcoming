@@ -131,7 +131,7 @@ class ChartingState extends MusicBeatState
 	var highlight:FlxSprite;
 
 	public static var GRID_SIZE:Int = 40;
-	var CAM_OFFSET:Int = 360;
+	var CAM_OFFSET:Int = 400;
 
 	var dummyArrow:FlxSprite;
 
@@ -208,8 +208,6 @@ class ChartingState extends MusicBeatState
 		192
 	];
 
-
-
 	var text:String = "";
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
@@ -259,18 +257,22 @@ class ChartingState extends MusicBeatState
 
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
-
+		
+		var breakpointIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 45, -90, Paths.image("breakpoint"));
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf');
 		rightIcon = new HealthIcon('dad');
+		breakpointIcon.scrollFactor.set(1, 1);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
 
+		breakpointIcon.setGraphicSize(30, 30);
 		eventIcon.setGraphicSize(30, 30);
 		leftIcon.setGraphicSize(0, 45);
 		rightIcon.setGraphicSize(0, 45);
 
+		add(breakpointIcon);
 		add(eventIcon);
 		add(leftIcon);
 		add(rightIcon);
@@ -306,14 +308,14 @@ class ChartingState extends MusicBeatState
 		bpmTxt.scrollFactor.set();
 		add(bpmTxt);
 
-		strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(GRID_SIZE * 9), 4);
+		strumLine = new FlxSprite(-GRID_SIZE, 50).makeGraphic(Std.int(GRID_SIZE * 10), 4);
 		add(strumLine);
 
 		quant = new AttachedSprite('chart_quant','chart_quant');
 		quant.animation.addByPrefix('q','chart_quant',0,false);
 		quant.animation.play('q', true, false, 0);
 		quant.sprTracker = strumLine;
-		quant.xAdd = -32;
+		quant.xAdd = -72;
 		quant.yAdd = 8;
 		add(quant);
 
@@ -360,6 +362,7 @@ class ChartingState extends MusicBeatState
 		\nHold Shift to move 4x faster
 		\nHold Control and click on an arrow to select it
 		\nZ/X - Zoom in/out
+		\n</> - Navigate between Breakpoints
 		\n
 		\nEsc - Test your chart inside Chart Editor
 		\nEnter - Play your chart
@@ -1595,19 +1598,25 @@ class ChartingState extends MusicBeatState
 
 	var updatedSection:Bool = false;
 
-	function sectionStartTime(add:Int = 0):Float
+	function sectionStartTime(add:Int = 0, forced:Bool = false):Float
 	{
 		var daBPM:Float = _song.bpm;
 		var daPos:Float = 0;
-		for (i in 0...curSec + add)
-		{
-			if(_song.notes[i] != null)
-			{
-				if (_song.notes[i].changeBPM)
-				{
-					daBPM = _song.notes[i].bpm;
+		if (forced) {
+			for (i in 0...add) {
+				if (_song.notes[i] != null) {
+					if (_song.notes[i].changeBPM)
+						daBPM = _song.notes[i].bpm;
+					daPos += getSectionBeats(i) * (1000 * 60 / daBPM);
 				}
-				daPos += getSectionBeats(i) * (1000 * 60 / daBPM);
+			}
+		} else {
+			for (i in 0...curSec + add) {
+				if (_song.notes[i] != null) {
+					if (_song.notes[i].changeBPM)
+						daBPM = _song.notes[i].bpm;
+					daPos += getSectionBeats(i) * (1000 * 60 / daBPM);
+				}
 			}
 		}
 		return daPos;
@@ -1793,11 +1802,10 @@ class ChartingState extends MusicBeatState
 				return;
 			}
 
-			if(FlxG.keys.justPressed.Z && FlxG.keys.pressed.CONTROL) {
+			if (FlxG.keys.justPressed.Z && FlxG.keys.pressed.CONTROL)
 				undo();
-			}
-
-
+			if (FlxG.keys.justPressed.Y && FlxG.keys.pressed.CONTROL)
+				redo();
 
 			if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
 				--curZoom;
@@ -2145,6 +2153,14 @@ class ChartingState extends MusicBeatState
 				//trace('Ticked');
 			}
 		}
+
+		if (!blockInput) {
+			if (FlxG.keys.justPressed.COMMA)
+				navBreakpoints(-1);
+			if (FlxG.keys.justPressed.PERIOD)
+				navBreakpoints(1);
+		}
+
 		lastConductorPos = Conductor.songPosition;
 		super.update(elapsed);
 	}
@@ -2202,7 +2218,8 @@ class ChartingState extends MusicBeatState
 	var lastSecBeatsNext:Float = 0;
 	function reloadGridLayer() {
 		gridLayer.clear();
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats() * 4 * zoomList[curZoom]));
+		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 10, Std.int(GRID_SIZE * getSectionBeats() * 4 * zoomList[curZoom]));
+		gridBG.x = -GRID_SIZE;
 
 		#if desktop
 		if(FlxG.save.data.chart_waveformInst || FlxG.save.data.chart_waveformVoices) {
@@ -2214,7 +2231,8 @@ class ChartingState extends MusicBeatState
 		var foundNextSec:Bool = false;
 		if(sectionStartTime(1) <= FlxG.sound.music.length)
 		{
-			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats(curSec + 1) * 4 * zoomList[curZoom]));
+			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 10, Std.int(GRID_SIZE * getSectionBeats(curSec + 1) * 4 * zoomList[curZoom]));
+			nextGridBG.x = -GRID_SIZE;
 			leHeight = Std.int(gridBG.height + nextGridBG.height);
 			foundNextSec = true;
 		}
@@ -2226,7 +2244,7 @@ class ChartingState extends MusicBeatState
 
 		if(foundNextSec)
 		{
-			var gridBlack:FlxSprite = new FlxSprite(0, gridBG.height).makeGraphic(Std.int(GRID_SIZE * 9), Std.int(nextGridBG.height), FlxColor.BLACK);
+			var gridBlack:FlxSprite = new FlxSprite(-GRID_SIZE, gridBG.height).makeGraphic(Std.int(GRID_SIZE * 10), Std.int(nextGridBG.height), FlxColor.BLACK);
 			gridBlack.alpha = 0.4;
 			gridLayer.add(gridBlack);
 		}
@@ -2243,6 +2261,10 @@ class ChartingState extends MusicBeatState
 		}
 
 		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + GRID_SIZE).makeGraphic(2, leHeight, FlxColor.BLACK);
+		gridLayer.add(gridBlackLine);
+		updateGrid();
+
+		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + GRID_SIZE * 2).makeGraphic(2, leHeight, FlxColor.BLACK);
 		gridLayer.add(gridBlackLine);
 		updateGrid();
 
@@ -2716,12 +2738,27 @@ class ChartingState extends MusicBeatState
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
 				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
-				daText.xAdd = -410;
+				daText.xAdd = -450;
 				daText.borderSize = 1;
 				if(note.eventLength > 1) daText.yAdd += 8;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 				//trace('test: ' + i[0], 'startThing: ' + startThing, 'endThing: ' + endThing);
+			}
+		}
+
+		if (_song.breakpoints == null)
+			_song.breakpoints = [];
+
+		for (i in _song.breakpoints) {
+			if (endThing > i && i >= startThing) {
+				var note:Note = setupNoteData([i], false);
+				var beats:Float = getSectionBeats(0);
+				note.y = getYfromStrumNotes(i - sectionStartTime(), beats);
+				if (note.y < -150)
+					note.y = -150;
+
+				curRenderedNotes.add(note);
 			}
 		}
 
@@ -2754,35 +2791,36 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
-	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
+	function setupNoteData(i:Dynamic, isNextSection:Bool):Note
 	{
-		var daNoteInfo = i[1];
+		var daNoteInfo:Dynamic = i[1];
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, true);
-		if(daSus != null) { //Common note
+		var note:Note = new Note(daStrumTime, Std.int(daNoteInfo) % 4, null, null, true);
+		if (daNoteInfo == null) {
+			note.loadGraphic(Paths.image("breakpoint"));
+			note.noteData = -2;
+			daNoteInfo = -2;
+		} else if (daSus == null) {
+			note.loadGraphic(Paths.image('eventArrow'));
+				note.eventName = getEventName(i[1]);
+				note.eventLength = i[1].length;
+				if (i[1].length < 2) {
+					note.eventVal1 = i[1][0][1];
+					note.eventVal2 = i[1][0][2];
+				}
+				note.noteData = -1;
+				daNoteInfo = -1;
+		} else {
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
-			{
 				i[3] = noteTypeIntMap.get(i[3]);
-			}
+
 			if(i.length > 3 && (i[3] == null || i[3].length < 1))
-			{
 				i.remove(i[3]);
-			}
+
 			note.sustainLength = daSus;
 			note.noteType = i[3];
-		} else { //Event note
-			note.loadGraphic(Paths.image('eventArrow'));
-			note.eventName = getEventName(i[1]);
-			note.eventLength = i[1].length;
-			if(i[1].length < 2)
-			{
-				note.eventVal1 = i[1][0][1];
-				note.eventVal2 = i[1][0][2];
-			}
-			note.noteData = -1;
-			daNoteInfo = -1;
 		}
 
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
@@ -2800,6 +2838,7 @@ class ChartingState extends MusicBeatState
 		note.y = getYfromStrumNotes(daStrumTime - sectionStartTime(), beats);
 		//if(isNextSection) note.y += gridBG.height;
 		if(note.y < -150) note.y = -150;
+		
 		return note;
 	}
 
@@ -2881,32 +2920,37 @@ class ChartingState extends MusicBeatState
 		var noteDataToCheck:Int = note.noteData;
 		if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 
-		if(note.noteData > -1) //Normal Notes
-		{
-			for (i in _song.notes[curSec].sectionNotes)
-			{
-				if (i[0] == note.strumTime && i[1] == noteDataToCheck)
-				{
-					if(i == curSelectedNote) curSelectedNote = null;
-					//FlxG.log.add('FOUND EVIL NOTE');
-					_song.notes[curSec].sectionNotes.remove(i);
-					break;
-				}
-			}
-		}
-		else //Events
-		{
-			for (i in _song.events)
-			{
-				if(i[0] == note.strumTime)
-				{
-					if(i == curSelectedNote)
-					{
+		if (note.noteData == -1) {
+			for (i in _song.events) {
+				if (i[0] == note.strumTime) {
+					if (curSelectedNote == i) {
 						curSelectedNote = null;
 						changeEventSelected();
 					}
 					//FlxG.log.add('FOUND EVIL EVENT');
 					_song.events.remove(i);
+					break;
+				}
+			}
+		} else if (note.noteData == -2) {
+			for (i in _song.breakpoints) {
+				if (i == note.strumTime) {
+					if (curSelectedNote == [i]) {
+						curSelectedNote = null;
+						// changeEventSelected();
+					}
+					//FlxG.log.add('FOUND EVIL BREAKPOINT');
+					_song.breakpoints.remove(i);
+					break;
+				}
+			}
+		} else {
+			for (i in _song.notes[curSec].sectionNotes) {
+				if (i[0] == note.strumTime && i[1] == noteDataToCheck) {
+					if (curSelectedNote == i)
+						curSelectedNote = null;
+					//FlxG.log.add('FOUND EVIL NOTE');
+					_song.notes[curSec].sectionNotes.remove(i);
 					break;
 				}
 			}
@@ -2959,19 +3003,19 @@ class ChartingState extends MusicBeatState
 		if (data != null) noteData = data;
 		if (type != null) daType = type;
 
-		if(noteData > -1)
-		{
-			_song.notes[curSec].sectionNotes.push([noteStrum, noteData, noteSus, noteTypeIntMap.get(daType)]);
-			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
-		}
-		else
-		{
+		if (noteData == -1) {
 			var event = eventStuff[Std.parseInt(eventDropDown.selectedId)][0];
 			var text1 = value1InputText.text;
 			var text2 = value2InputText.text;
 			_song.events.push([noteStrum, [[event, text1, text2]]]);
 			curSelectedNote = _song.events[_song.events.length - 1];
 			curEventSelected = 0;
+		} else if (noteData == -2) {
+			_song.breakpoints.push(noteStrum);
+			curSelectedNote = [_song.breakpoints[_song.breakpoints.length - 1]];
+		} else {
+			_song.notes[curSec].sectionNotes.push([noteStrum, noteData, noteSus, noteTypeIntMap.get(daType)]);
+			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 		}
 		changeEventSelected();
 
@@ -3148,6 +3192,36 @@ class ChartingState extends MusicBeatState
 		
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val != null ? val : 4;
+	}
+
+	var curBreakpoint:Int = -1;
+	function navBreakpoints(huh:Int = 0) {
+		if (_song.breakpoints == null || _song.breakpoints.length == 0)
+			return;
+
+		var targetBreakpoint:Int = curBreakpoint + huh;
+		if (targetBreakpoint > _song.breakpoints.length - 1)
+			targetBreakpoint -= 0;
+		if (targetBreakpoint < 0)
+			targetBreakpoint = _song.breakpoints.length - 1;
+
+		if ((huh < 0 && Conductor.songPosition > _song.breakpoints[curBreakpoint]) || (huh > 0 && Conductor.songPosition < _song.breakpoints[curBreakpoint]))
+			targetBreakpoint = curBreakpoint;
+
+		var targetSection:Int = curSec;
+
+		for (i in 0..._song.notes.length) {
+			var startTime:Float = sectionStartTime(i);
+			var endTime:Float = sectionStartTime(i + 1);
+			
+			if (startTime <= _song.breakpoints[targetBreakpoint] && endTime > _song.breakpoints[targetBreakpoint])
+				targetSection = i;
+		}
+
+		changeSection(targetSection, true);
+
+		curBreakpoint = targetBreakpoint;
+		trace(curBreakpoint);
 	}
 }
 

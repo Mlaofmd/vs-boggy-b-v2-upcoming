@@ -39,6 +39,8 @@ typedef SwagSong =
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
+
+	@:optional var breakpoints:Array<Float>;
 }
 
 class Song
