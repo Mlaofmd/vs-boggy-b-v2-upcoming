@@ -3195,38 +3195,39 @@ class ChartingState extends MusicBeatState
 		return val != null ? val : 4;
 	}
 
-	var curBreakpoint:Int = -1;
+	var curBreakpoint:Int = 0;
 	function navBreakpoints(huh:Int = 0) {
 		if (_song.breakpoints == null || _song.breakpoints.length == 0)
 			return;
 
-		var targetBreakpoint:Int = curBreakpoint + huh;
-		if (targetBreakpoint > _song.breakpoints.length - 1)
-			targetBreakpoint -= 0;
-		if (targetBreakpoint < 0)
-			targetBreakpoint = _song.breakpoints.length - 1;
+		if (!(huh > 0 && curSec < sectionFromBreakpoint(curBreakpoint)) && !(huh < 0 && curSec > sectionFromBreakpoint(curBreakpoint))) {
+			curBreakpoint += (huh > 0) ? 1 : -1;
 
-		if ((huh < 0 && Conductor.songPosition > _song.breakpoints[curBreakpoint]) || (huh > 0 && Conductor.songPosition < _song.breakpoints[curBreakpoint]))
-			targetBreakpoint = curBreakpoint;
-
-		var targetSection:Int = curSec;
-
-		for (i in 0..._song.notes.length) {
-			var startTime:Float = sectionStartTime(i);
-			var endTime:Float = sectionStartTime(i + 1);
-			
-			if (startTime <= _song.breakpoints[targetBreakpoint] && endTime > _song.breakpoints[targetBreakpoint])
-				targetSection = i;
+			if (curBreakpoint >= _song.breakpoints.length)
+				curBreakpoint = 0;
+			if (curBreakpoint < 0)
+				curBreakpoint = _song.breakpoints.length - 1;
 		}
 
-		changeSection(targetSection, true);
+		changeSection(sectionFromBreakpoint(curBreakpoint));
 
-		curBreakpoint = targetBreakpoint;
 		trace(curBreakpoint);
 	}
 
 	function sortBreakpoints(obj1:Float, obj2:Float) {
 		return FlxSort.byValues(FlxSort.ASCENDING, obj1, obj2);
+	}
+
+	function sectionFromBreakpoint(id:Int):Int {
+		if (_song.breakpoints.length - 1 < id)
+			return curSec;
+
+		for (i in 0..._song.notes.length) {
+			if (sectionStartTime(i) <= _song.breakpoints[id] && (_song.notes[i + 1] == null || sectionStartTime(i + 1) > _song.breakpoints[id]))
+				return i;
+		}
+
+		return curSec;
 	}
 }
 
