@@ -87,6 +87,7 @@ class CreditsState extends MusicBeatState
 			["Special Thanks"],
 			["Shadow Mario",        "shadowmario",      "Main Programmer of Psych Engine",                              "https://twitter.com/Shadow_Mario_",    "444444"],
 			["RiverOaken",          "river",            "Main Artist/Animator of Psych Engine",                         "https://twitter.com/RiverOaken",       "B42F71"],
+			["shubs",               "shubs",            "Assistans Programmer of Psych Engine",                         "https://twitter.com/yoshubs",          "5E99DF"],
 			["PurSnake",            "snake",            "Base code for Sustain Note Splashes",                          "https://twitter.com/PurSniki",         "8C41B6"],
 			["KerSive",             "kersive",          "Sustain Note Splash Animations",                               "",                                     "C2C04A"],
 			["iFlicky",             "flicky",           "Composer of Psync and Tea Time\nMade the Dialogue Sounds",     "https://twitter.com/flicky_i",         "9E29CF"],
