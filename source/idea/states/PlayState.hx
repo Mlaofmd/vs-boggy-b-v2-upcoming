@@ -1,5 +1,6 @@
 package idea.states;
 
+import flixel.system.FlxAssets.FlxShader;
 import tea.SScript;
 import idea.shaders.ColorSwap.HSVMap;
 import flixel.graphics.FlxGraphic;
@@ -1022,9 +1023,6 @@ class PlayState extends MusicBeatState
 		emptyColor.alphaFloat = 0.35;
 
 		var fillColor:FlxColor = FlxColor.WHITE;
-		fillColor.red = 228;
-		fillColor.green = 228;
-		fillColor.blue = 228;
 		fillColor.alphaFloat = 0.75;
 
 		timeBar = new FlxBar(0, ClientPrefs.data.downScroll ? FlxG.height - 8 : 0, LEFT_TO_RIGHT, FlxG.width, 8, this, "songPercent", 0, 1);
@@ -1383,19 +1381,20 @@ class PlayState extends MusicBeatState
 
 	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = [];
-	public function createRuntimeShader(name:String):FlxRuntimeShader
+	public function createRuntimeShader(name:String):PostProcess
 	{
-		if(!ClientPrefs.data.shaders) return new FlxRuntimeShader();
+		if (!ClientPrefs.data.shaders)
+			return new PostProcess();
 
 		#if SHADERS_ALLOWED
 		if(!runtimeShaders.exists(name) && !initLuaShader(name))
 		{
 			FlxG.log.warn("Shader " + name + " is missing!");
-			return new FlxRuntimeShader();
+			return new PostProcess();
 		}
 
 		var arr:Array<String> = runtimeShaders.get(name);
-		return new FlxRuntimeShader(arr[0], arr[1]);
+		return new PostProcess(arr[0], arr[1]);
 		#else
 		FlxG.log.warn("Platform unsupported for Runtime Shaders!");
 		return null;

@@ -119,12 +119,6 @@
 	-->
 	<assets path="assets/fonts" />
 
-	<!-- _______________________________ C++ stuff ______________________________ -->
-
-	<target id="haxe">
-		<lib name="dwmapi.lib" if="windows" />
-	</target>
-
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
