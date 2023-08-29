@@ -8,6 +8,7 @@ class FunkinHScript extends SScript {
 
     public function new(script:String) {
         #if HSCRIPT_ALLOWED
+
         super(script, false, false);
 
         scriptName = script;
@@ -16,6 +17,7 @@ class FunkinHScript extends SScript {
         set("scriptName", script);
         set("this", this);
         set("game", PlayState.instance);
+		set("PlayState", PlayState);
 
         #if windows
 		set("buildTarget", "windows");
@@ -40,13 +42,21 @@ class FunkinHScript extends SScript {
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
     
-        set("add", PlayState.instance.add);
+        set("luaTrace", FunkinLua.luaTrace);
+
+		set("add", PlayState.instance.add);
 		set("addBehindGF", PlayState.instance.addBehindGF);
 		set("addBehindDad", PlayState.instance.addBehindDad);
 		set("addBehindBF", PlayState.instance.addBehindBF);
 		set("insert", PlayState.instance.insert);
 		set("remove", PlayState.instance.remove);
         set("luaTrace", FunkinLua.luaTrace);
+
+		setClass(BGSprite);
+		setClass(flixel.text.FlxText);
+		setClass(flixel.tweens.FlxTween);
+		setClass(flixel.tweens.FlxEase);
+		setClass(flixel.util.FlxTimer);
 
 		preset();
 		execute();

@@ -2771,7 +2771,7 @@ class FunkinLua {
 			#if (!flash && SHADERS_ALLOWED && sys)
 			@:privateAccess {
 				var camera:FlxCamera = cameraFromString(cam);
-				var shader:PostProcess = PlayState.instance.createRuntimeShader(name);
+				var shader:FlxRuntimeShader = PlayState.instance.createRuntimeShader(name);
 				var shaders:Array<BitmapFilter> = camera._filters;
 				shaders.push(new ShaderFilter(shader));
 				camera.setFilters(shaders);
@@ -2784,7 +2784,7 @@ class FunkinLua {
 					return false;
 				}
 				var arr:Array<String> = PlayState.instance.runtimeShaders.get(name);
-				shaders.push(new ShaderFilter(new PostProcess(arr[0], arr[1])));
+				shaders.push(new ShaderFilter(new FlxRuntimeShader(arr[0], arr[1])));
 				camera.setFilters(shaders);
 				return true;
 			}

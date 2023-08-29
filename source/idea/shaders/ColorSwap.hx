@@ -215,19 +215,3 @@ class ColorSwapShader extends FlxShader {
 		super();
 	}
 }
-
-class HSVMap {
-	public var hue:Float;
-	public var sat:Float;
-	public var brt:Float;
-
-	public function new(?hue:Float, ?sat:Float, ?brt:Float) {
-		set(hue, sat, brt);
-	}
-
-	public function set(hue:Float = 0, sat:Float = 0, brt:Float = 0) {
-		this.hue = hue;
-		this.sat = sat;
-		this.brt = brt;
-	}
-}

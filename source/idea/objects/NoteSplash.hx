@@ -54,7 +54,7 @@ class NoteSplash extends FlxSprite
 			scale.set(0.7, 0.7);
 			centerOffsets();
 			alpha = 0.8;
-			setPosition(x - width * 0.25, y + height * (ClientPrefs.data.downScroll ? 1 : 0.41));
+			setPosition(x - width * 0.25, y + height * (ClientPrefs.data.downScroll ? -1 : 0.41));
 			flipY = ClientPrefs.data.downScroll;
 
 			parentStrum = strum;

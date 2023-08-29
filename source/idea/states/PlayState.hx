@@ -1,8 +1,5 @@
 package idea.states;
 
-import flixel.system.FlxAssets.FlxShader;
-import tea.SScript;
-import idea.shaders.ColorSwap.HSVMap;
 import flixel.graphics.FlxGraphic;
 #if desktop
 import external.Discord.DiscordClient;
@@ -80,6 +77,10 @@ import sys.io.File;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
 #elseif (hxCodec == "2.6.0") import VideoHandler as MP4Handler;
 #else import vlc.MP4Handler; #end
+#end
+
+#if (SScript >= "3.0.0")
+import tea.SScript;
 #end
 
 using StringTools;
@@ -898,13 +899,38 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
+		#if HSCRIPT_ALLOWED
+		var filesPushed:Array<String> = [];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath("scripts/")];
+
+		#if MODS_ALLOWED
+		foldersToCheck.insert(0, Paths.mods("scripts/"));
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + "/scripts/"));
+
+		for(mod in Paths.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + "/scripts/"));
+		#end
+
+		for (folder in foldersToCheck) {
+			if (FileSystem.exists(folder)) {
+				for (file in FileSystem.readDirectory(folder)) {
+					if (file.endsWith(".hx") && !filesPushed.contains(file)) {
+						hscriptArray.push(new FunkinHScript(folder + file));
+						filesPushed.push(file);
+					}
+				}
+			}
+		}
+		#end
+
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED
-		startLuasNamed('stages/' + curStage + '.lua');
+		startLuasNamed("stages/" + curStage + ".lua");
 		#end
 
 		#if HSCRIPT_ALLOWED
-		startHScriptsNamed('stages/' + curStage + '.hx');
+		startHScriptsNamed("stages/" + curStage + ".hx");
 		#end
 
 		var gfVersion:String = SONG.gfVersion;
@@ -938,7 +964,7 @@ class PlayState extends MusicBeatState
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			gfGroup.add(gf);
-			startCharacterLua(gf.curCharacter);
+			startCharacterScripts(gf.curCharacter);
 
 			if(gfVersion == 'pico-speaker')
 			{
@@ -965,12 +991,12 @@ class PlayState extends MusicBeatState
 		dad = new Character(0, 0, SONG.player2);
 		startCharacterPos(dad, true);
 		dadGroup.add(dad);
-		startCharacterLua(dad.curCharacter);
+		startCharacterScripts(dad.curCharacter);
 
 		boyfriend = new Boyfriend(0, 0, SONG.player1);
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
-		startCharacterLua(boyfriend.curCharacter);
+		startCharacterScripts(boyfriend.curCharacter);
 
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
@@ -1381,20 +1407,20 @@ class PlayState extends MusicBeatState
 
 	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = [];
-	public function createRuntimeShader(name:String):PostProcess
+	public function createRuntimeShader(name:String):FlxRuntimeShader
 	{
 		if (!ClientPrefs.data.shaders)
-			return new PostProcess();
+			return new FlxRuntimeShader();
 
 		#if SHADERS_ALLOWED
 		if(!runtimeShaders.exists(name) && !initLuaShader(name))
 		{
 			FlxG.log.warn("Shader " + name + " is missing!");
-			return new PostProcess();
+			return new FlxRuntimeShader();
 		}
 
 		var arr:Array<String> = runtimeShaders.get(name);
-		return new PostProcess(arr[0], arr[1]);
+		return new FlxRuntimeShader(arr[0], arr[1]);
 		#else
 		FlxG.log.warn("Platform unsupported for Runtime Shaders!");
 		return null;
@@ -1512,7 +1538,7 @@ class PlayState extends MusicBeatState
 					boyfriendGroup.add(newBoyfriend);
 					startCharacterPos(newBoyfriend);
 					newBoyfriend.alpha = 0.00001;
-					startCharacterLua(newBoyfriend.curCharacter);
+					startCharacterScripts(newBoyfriend.curCharacter);
 				}
 
 			case 1:
@@ -1522,7 +1548,7 @@ class PlayState extends MusicBeatState
 					dadGroup.add(newDad);
 					startCharacterPos(newDad, true);
 					newDad.alpha = 0.00001;
-					startCharacterLua(newDad.curCharacter);
+					startCharacterScripts(newDad.curCharacter);
 				}
 
 			case 2:
@@ -1533,48 +1559,70 @@ class PlayState extends MusicBeatState
 					gfGroup.add(newGf);
 					startCharacterPos(newGf);
 					newGf.alpha = 0.00001;
-					startCharacterLua(newGf.curCharacter);
+					startCharacterScripts(newGf.curCharacter);
 				}
 		}
 	}
 
-	function startCharacterLua(name:String)
-	{
+	function startCharacterScripts(name:String) {
 		#if LUA_ALLOWED
 		var doPush:Bool = false;
-		var luaFile:String = 'characters/' + name + '.lua';
+		var luaFile:String = "characters/" + name + ".lua";
 		#if MODS_ALLOWED
-		if(FileSystem.exists(Paths.modFolders(luaFile))) {
-			luaFile = Paths.modFolders(luaFile);
+		var replacePath:String = Paths.modFolders(luaFile);
+		if(FileSystem.exists(replacePath)) {
+			luaFile = replacePath;
 			doPush = true;
 		} else {
 			luaFile = Paths.getPreloadPath(luaFile);
-			if(FileSystem.exists(luaFile)) {
+			if (FileSystem.exists(luaFile))
 				doPush = true;
-			}
 		}
 		#else
 		luaFile = Paths.getPreloadPath(luaFile);
-		if(Assets.exists(luaFile)) {
+		if (Assets.exists(luaFile))
 			doPush = true;
+		#end
+
+		if (doPush) {
+			for (script in luaArray) {
+				if (script.scriptName == luaFile) {
+					doPush = false;
+					break;
+				}
+			}
+			if (doPush)
+				luaArray.push(new FunkinLua(luaFile));
 		}
 		#end
 
-		if(doPush)
-		{
-			for (script in luaArray)
-			{
-				if(script.scriptName == luaFile) return;
-			}
-			luaArray.push(new FunkinLua(luaFile));
+		#if HSCRIPT_ALLOWED
+		var doPush:Bool = false;
+		var scriptFile:String = "characters/" + name + ".hx";
+		var replacePath:String = Paths.modFolders(scriptFile);
+		if (FileSystem.exists(replacePath)) {
+			scriptFile = replacePath;
+			doPush = true;
+		} else {
+			scriptFile = Paths.getPreloadPath(scriptFile);
+			if(FileSystem.exists(scriptFile))
+				doPush = true;
+		}
+		
+		if (doPush) {
+			if (SScript.global.exists(scriptFile))
+				doPush = false;
+
+			if (doPush)
+				initHScript(scriptFile);
 		}
 		#end
 	}
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
-		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
-		if(variables.exists(tag)) return variables.get(tag);
+		if (modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if (text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
+		if (variables.exists(tag)) return variables.get(tag);
 		return null;
 	}
 
@@ -3338,7 +3386,7 @@ class PlayState extends MusicBeatState
 		setOnScripts("cameraX", FlxG.camera.viewX + FlxG.camera.width / 2);
 		setOnScripts('cameraY', FlxG.camera.viewY + FlxG.camera.height / 2);
 		setOnScripts('botPlay', cpuControlled);
-		callOnScripts('onUpdatePost', [elapsed]);
+		callOnScripts("onUpdatePost", [elapsed]);
 	}
 
 	public function openPauseMenu() {
@@ -4834,41 +4882,41 @@ class PlayState extends MusicBeatState
 	}
 
 	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
-		var skin:String = 'noteSplashes';
-		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
+		var skin:String = "noteSplashes";
+		if (SONG.splashSkin != null && SONG.splashSkin.length > 0)
+			skin = SONG.splashSkin;
 
-		var HSV:HSVMap = new HSVMap();
+		var HSV:Array<Float> = [0, 0, 0];
 		if (data > -1 && data < ClientPrefs.data.arrowHSV.length) {
-			HSV.set(ClientPrefs.data.arrowHSV[data][0] / 360, ClientPrefs.data.arrowHSV[data][1] / 100, ClientPrefs.data.arrowHSV[data][2] / 100);
+			HSV = [ClientPrefs.data.arrowHSV[data][0] / 360, ClientPrefs.data.arrowHSV[data][1] / 100, ClientPrefs.data.arrowHSV[data][2] / 100];
 			if (note != null) {
 				skin = note.noteSplashTexture;
-				HSV.set(note.noteSplashHue, note.noteSplashSat, note.noteSplashBrt);
+				HSV = [note.noteSplashHue, note.noteSplashSat, note.noteSplashBrt];
 			}
 		}
 
 		var splash:NoteSplash = grpRegularSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(x, y, data, skin, HSV.hue, HSV.sat, HSV.brt);
+		splash.setupNoteSplash(x, y, data, skin, HSV[0], HSV[1], HSV[2]);
 		grpRegularSplashes.add(splash);
 	}
 
 	public function spawnSustainNoteSplash(x:Float, y:Float, data:Int, ?strum:StrumNote = null, ?note:Note = null) {
-		var skin:String = 'noteSplashes';
-		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
+		var skin:String = "noteSplashes";
+		if (SONG.splashSkin != null && SONG.splashSkin.length > 0)
+			skin = SONG.splashSkin;
 
-		var HSV:HSVMap = new HSVMap();
+		var HSV:Array<Float> = [0, 0, 0];
 		if (data > -1 && data < ClientPrefs.data.arrowHSV.length) {
-			HSV.set(ClientPrefs.data.arrowHSV[data][0] / 360, ClientPrefs.data.arrowHSV[data][1] / 100, ClientPrefs.data.arrowHSV[data][2] / 100);
+			HSV = [ClientPrefs.data.arrowHSV[data][0] / 360, ClientPrefs.data.arrowHSV[data][1] / 100, ClientPrefs.data.arrowHSV[data][2] / 100];
 			if (note != null) {
 				skin = note.noteSplashTexture;
-				HSV.set(note.noteSplashHue, note.noteSplashSat, note.noteSplashBrt);
+				HSV = [note.noteSplashHue, note.noteSplashSat, note.noteSplashBrt];
 			}
 		}
 
 		var splash:NoteSplash = grpSustainSplashes.recycle(NoteSplash);
 		splash.isSustain = true;
-		splash.setupNoteSplash(x, y, data, skin, HSV.hue, HSV.sat, HSV.brt, strum);
+		splash.setupNoteSplash(x, y, data, skin, HSV[0], HSV[1], HSV[2], strum);
 		grpSustainSplashes.add(splash);
 	}
 
@@ -5049,11 +5097,25 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
+		#if LUA_ALLOWED
 		for (lua in luaArray) {
 			lua.call('onDestroy', []);
 			lua.stop();
 		}
 		luaArray = [];
+		#end
+
+		#if HSCRIPT_ALLOWED
+		for (script in hscriptArray) {
+			if(script != null) {
+				script.call('onDestroy');
+				script.destroy();
+			}
+		}
+
+		while (hscriptArray.length > 0)
+			hscriptArray.pop();
+		#end
 
 		#if hscript
 		if(FunkinLua.hscript != null) FunkinLua.hscript = null;
@@ -5247,9 +5309,10 @@ class PlayState extends MusicBeatState
 		if(!FileSystem.exists(scriptToLoad))
 			scriptToLoad = Paths.getPreloadPath(scriptFile);
 		
-		if(FileSystem.exists(scriptToLoad))
+		if (FileSystem.exists(scriptToLoad))
 		{
-			if (SScript.global.exists(scriptToLoad)) return false;
+			if (SScript.global.exists(scriptToLoad))
+				return false;
 	
 			initHScript(scriptToLoad);
 			return true;
@@ -5323,7 +5386,7 @@ class PlayState extends MusicBeatState
 		if(excludeValues == null) excludeValues = [];
 
 		var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
-		if(result == null || excludeValues.contains(result) || result == FunkinLua.Function_Continue) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if (result == null || excludeValues.contains(result) || result == FunkinLua.Function_Continue) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		return result;
 	}
 

@@ -3197,7 +3197,7 @@ class ChartingState extends MusicBeatState
 
 	var curBreakpoint:Int = 0;
 	function navBreakpoints(huh:Int = 0) {
-		if (_song.breakpoints == null || _song.breakpoints.length == 0)
+		if (_song.breakpoints == null || _song.breakpoints.length < 2)
 			return;
 
 		if (!(huh > 0 && curSec < sectionFromBreakpoint(curBreakpoint)) && !(huh < 0 && curSec > sectionFromBreakpoint(curBreakpoint))) {

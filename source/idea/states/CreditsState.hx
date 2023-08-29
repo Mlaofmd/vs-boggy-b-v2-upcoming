@@ -91,7 +91,7 @@ class CreditsState extends MusicBeatState
 			["KerSive",             "kersive",          "Sustain Note Splash Animations",                               "",                                     "C2C04A"],
 			["iFlicky",             "flicky",           "Composer of Psync and Tea Time\nMade the Dialogue Sounds",     "https://twitter.com/flicky_i",         "9E29CF"],
 			["SqirraRNG",           "sqirra",           "Crash Handler and Base code for\nChart Editor\'s Waveform",    "https://twitter.com/gedehari",         "E1843A"],
-			["EliteMasterEric",     "mastereric",       "Base code for Post-Processing",                                "https://twitter.com/EliteMasterEric",  "FFBD40"],
+			["EliteMasterEric",     "mastereric",       "Runtime Shaders support",                                      "https://twitter.com/EliteMasterEric",  "FFBD40"],
 			["PolybiusProxy",       "proxy",            ".MP4 Video Loader Library (hxCodec)",                          "https://twitter.com/polybiusproxy",    "DCD294"],
 			["Nebula the Zorua",	"nebula",			"LUA JIT Fork and some Lua reworks",							"https://twitter.com/Nebula_Zorua",		"7D40B2"],
 			["Smokey",				"smokey",			"Sprite Atlas Support",											"https://twitter.com/Smokey_5_",		"483D92"],
